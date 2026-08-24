@@ -1,0 +1,27 @@
+{
+  "name": "wallhaven",
+  "display": "Wallhaven 壁纸 (GFW 需代理)",
+  "driver": "http",
+  "needs_proxy": true,
+  "request": {
+    "method": "GET",
+    "url": "https://wallhaven.cc/api/v1/search",
+    "headers": {"User-Agent": "Mozilla/5.0"},
+    "params": {
+      "q": "{query}", "sorting": "{sorting}", "categories": "111",
+      "purity": "{purity}", "page": "{page}", "apikey": "{key}"
+    },
+    "skip_empty_params": true,
+    "pagination": {"type": "page", "param": "page", "start": 1, "step": 1, "per_page": 24, "stop_path": "meta.last_page"}
+  },
+  "parse": {"format": "json", "list_path": "data", "stop_when_empty": true},
+  "item": {
+    "url": {"path": "path"},
+    "title": {"const": "{query}"},
+    "author": {"path": "uploader"},
+    "width": {"path": "dimension_x", "transform": [{"op": "to_int"}]},
+    "height": {"path": "dimension_y", "transform": [{"op": "to_int"}]},
+    "referer": {"const": "https://wallhaven.cc/"},
+    "meta": {"id": {"path": "id"}, "category": {"path": "category"}}
+  }
+}

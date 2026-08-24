@@ -1,0 +1,25 @@
+{
+  "name": "lexica",
+  "display": "Lexica SD 搜索 (GFW 需代理)",
+  "driver": "http",
+  "needs_proxy": true,
+  "request": {
+    "method": "POST",
+    "url": "https://lexica.art/api/infinite-prompts",
+    "headers": {"User-Agent": "Mozilla/5.0", "Content-Type": "application/json"},
+    "body": {"text": "{query}", "searchMode": "images", "source": "search", "model": "lexica-aperture-v2"},
+    "pagination": {
+      "type": "list",
+      "default_queries": ["concept art", "fantasy", "portrait", "anime", "landscape", "cyberpunk", "illustration", "photorealistic"]
+    }
+  },
+  "parse": {"format": "json", "list_path": "images", "stop_when_empty": true},
+  "item": {
+    "url": {"template": "https://image.lexica.art/full_jpg/{id}"},
+    "title": {"default": [{"path": "prompt"}, {"const": "{query}"}]},
+    "author": {"path": "a"},
+    "width": {"path": "w", "transform": [{"op": "to_int"}]},
+    "height": {"path": "h", "transform": [{"op": "to_int"}]},
+    "meta": {"id": {"path": "id"}, "lexica_prompt": {"path": "prompt"}}
+  }
+}

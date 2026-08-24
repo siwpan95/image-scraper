@@ -1,0 +1,19 @@
+{
+  "name": "midjourney",
+  "display": "Midjourney Explore (浏览器)",
+  "driver": "browser",
+  "needs_browser": true,
+  "browser": {
+    "explore_url": "https://www.midjourney.com/explore",
+    "api_path": "/api/explore",
+    "cdn": "https://cdn.midjourney.com",
+    "size_suffix": {
+      "thumb": "_384_N.webp",
+      "medium": "_1024_N.webp",
+      "original": ".png",
+      "original_webp": ".webp"
+    },
+    "build": {"url_template": "{cdn}/{id}/0_{vi}{suffix}", "variants": 4},
+    "skip_type": "video"
+  }
+}

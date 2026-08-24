@@ -1,0 +1,26 @@
+{
+  "name": "civitai",
+  "display": "Civitai SD 社区",
+  "driver": "http",
+  "needs_proxy": true,
+  "request": {
+    "method": "GET",
+    "url": "https://civitai.com/api/v1/images",
+    "headers": {"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+    "params": {
+      "limit": 100, "page": "{page}", "sort": "{sorting}",
+      "username": "{query}", "nsfw": "{nsfw_flag}", "browsingLevel": "{browsing}"
+    },
+    "skip_empty_params": true,
+    "pagination": {"type": "page", "param": "page", "start": 1, "step": 1, "per_page": 100, "stop_path": "metadata.totalPages"}
+  },
+  "parse": {"format": "json", "list_path": "items", "stop_when_empty": true},
+  "item": {
+    "url": {"path": "url"},
+    "title": {"path": "prompt"},
+    "author": {"path": "username"},
+    "width": {"path": "width", "transform": [{"op": "to_int"}]},
+    "height": {"path": "height", "transform": [{"op": "to_int"}]},
+    "meta": {"id": {"path": "id"}, "nsfw": {"path": "nsfwLevel"}}
+  }
+}

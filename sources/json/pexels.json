@@ -1,0 +1,24 @@
+{
+  "name": "pexels",
+  "display": "Pexels 精选图库",
+  "driver": "http",
+  "needs_proxy": false,
+  "needs_key": false,
+  "request": {
+    "method": "GET",
+    "url": "https://api.pexels.com/v1/search",
+    "headers": {"Authorization": "{key}"},
+    "params": {"query": "{query}", "page": "{page}", "per_page": 40},
+    "skip_empty_params": true,
+    "pagination": {"type": "page", "param": "page", "start": 1, "step": 1, "per_page": 40}
+  },
+  "parse": {"format": "json", "list_path": "photos", "stop_when_empty": true},
+  "item": {
+    "url": {"default": [{"path": "src.original"}, {"path": "src.large2x"}, {"path": "src.large"}]},
+    "title": {"path": "alt"},
+    "author": {"path": "photographer"},
+    "width": {"path": "width", "transform": [{"op": "to_int"}]},
+    "height": {"path": "height", "transform": [{"op": "to_int"}]},
+    "meta": {"id": {"path": "id"}, "url_page": {"path": "url"}}
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "pixabay_music",
+  "driver": "http",
+  "needs_proxy": false,
+  "needs_key": false,
+  "fetch": "curl",
+  "request": {
+    "method": "GET",
+    "url": "https://pixabay.com/zh/music/search/{query}/",
+    "headers": {
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Referer": "https://pixabay.com/"
+    },
+    "pagination": {
+      "type": "page",
+      "param": "pagi",
+      "start": 1,
+      "count_var": "pages",
+      "stop_when_empty": true,
+      "delay": 3
+    }
+  },
+  "parse": {
+    "format": "html",
+    "url_extract": {
+      "patterns": ["/zh/music/(?!search/)[^\"'>`\\s]*-\\d+/"],
+      "url_resolve": true
+    },
+    "detail": {
+      "delay": 2,
+      "url_extract": {
+        "patterns": ["https://cdn\\.pixabay\\.com/download/audio/[^\"'>`\\s]*?\\.mp3"]
+      }
+    }
+  },
+  "item": {
+    "url": {"path": "url"},
+    "title": {"const": ""},
+    "referer": {"const": "https://pixabay.com/"}
+  }
+}

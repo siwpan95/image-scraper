@@ -1,0 +1,29 @@
+{
+  "name": "konachan",
+  "display": "Konachan 图库",
+  "driver": "http",
+  "needs_proxy": true,
+  "request": {
+    "method": "GET",
+    "url": "https://konachan.com/post.json",
+    "headers": {"User-Agent": "Mozilla/5.0"},
+    "params": {
+      "tags": "{eff_tags}", "limit": "{limit}", "page": "{page}"
+    },
+    "pagination": {"type": "page", "param": "page", "start": 1, "step": 1, "per_page": "{limit}"}
+  },
+  "parse": {"format": "json", "list_path": "", "stop_when_empty": true},
+  "item": {
+    "url": {"default": [
+      {"path": "file_url"},
+      {"path": "jpeg_url"},
+      {"path": "preview_url"}
+    ]},
+    "title": {"path": "tags"},
+    "author": {"default": [{"path": "author"}, {"path": "owner"}]},
+    "width": {"path": "width", "transform": [{"op": "to_int"}]},
+    "height": {"path": "height", "transform": [{"op": "to_int"}]},
+    "referer": {"const": "https://konachan.com"},
+    "meta": {"id": {"path": "id"}, "tags": {"path": "tags"}}
+  }
+}

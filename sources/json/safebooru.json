@@ -1,0 +1,30 @@
+{
+  "name": "safebooru",
+  "display": "Safebooru 图库",
+  "driver": "http",
+  "needs_proxy": false,
+  "request": {
+    "method": "GET",
+    "url": "https://safebooru.org/index.php",
+    "headers": {"User-Agent": "Mozilla/5.0"},
+    "params": {
+      "page": "dapi", "s": "post", "q": "index", "json": "1",
+      "tags": "{eff_tags}", "limit": "{limit}", "pid": "{page}"
+    },
+    "pagination": {"type": "page", "param": "pid", "start": 0, "step": "{limit}", "per_page": "{limit}"}
+  },
+  "parse": {"format": "json", "list_path": "", "stop_when_empty": true},
+  "item": {
+    "url": {"default": [
+      {"path": "file_url"},
+      {"path": "jpeg_url"},
+      {"path": "preview_url"}
+    ]},
+    "title": {"path": "tags"},
+    "author": {"default": [{"path": "author"}, {"path": "owner"}]},
+    "width": {"path": "width", "transform": [{"op": "to_int"}]},
+    "height": {"path": "height", "transform": [{"op": "to_int"}]},
+    "referer": {"const": "https://safebooru.org"},
+    "meta": {"id": {"path": "id"}, "tags": {"path": "tags"}}
+  }
+}

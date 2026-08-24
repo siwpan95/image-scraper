@@ -1,0 +1,28 @@
+{
+  "name": "deviantart",
+  "display": "DeviantArt (公开 RSS)",
+  "driver": "browser_html",
+  "needs_proxy": true,
+  "request": {
+    "method": "GET",
+    "url": "https://backend.deviantart.com/rss.xml",
+    "headers": {"User-Agent": "Mozilla/5.0"},
+    "params": {"type": "deviation", "q": "boost:{sorting} {query}", "page": "{page}"},
+    "pagination": {"type": "page", "param": "page", "start": 1, "step": 1, "per_page": 60}
+  },
+  "parse": {
+    "format": "html",
+    "block_extract": {
+      "block": "<item>(.*?)</item>",
+      "block_flags": "S",
+      "url": "<media:content[^>]*url=\"(https?://[^\"]+)\"",
+      "title": "<title>(.*?)</title>"
+    }
+  },
+  "item": {
+    "url": {"path": "url"},
+    "title": {"path": "title"},
+    "referer": {"const": "https://www.deviantart.com/"},
+    "meta": {"query": {"const": "{query}"}, "sort": {"const": "{sorting}"}}
+  }
+}

@@ -1,0 +1,4 @@
+# image-scraper dependencies (auto-generated 2026-08-20)
+httpx
+moviepy
+proglog

@@ -1,0 +1,52 @@
+{
+  "name": "webpage",
+  "display": "指定网页爬取",
+  "driver": "browser_html",
+  "needs_proxy": false,
+  "request": {
+    "method": "GET",
+    "url": "{url}",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"
+    },
+    "pagination": {
+      "type": "none"
+    }
+  },
+  "parse": {
+    "format": "html",
+    "url_extract": {
+      "patterns": [
+        "<img[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<img[^>]+data-src\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<img[^>]+data-original\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<img[^>]+data-lazy-src\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<img[^>]+data-lazy\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<source[^>]+srcset\\s*=\\s*[\"']([^\"']+)[\"']",
+        "background(?:-image)?\\s*:\\s*url\\s*\\(\\s*[\"']?([^\"')]+)[\"']?\\s*\\)"
+      ],
+      "url_resolve": true,
+      "url_decode": true
+    },
+    "url_transform": [
+      {"op": "regex_replace", "pattern": "^//", "repl": "https://"}
+    ]
+  },
+  "item": {
+    "url": {
+      "path": "url",
+      "filter": {"is_image": true}
+    },
+    "title": {
+      "const": "{url}"
+    },
+    "author": {
+      "const": ""
+    },
+    "referer": {
+      "const": "{page_origin}"
+    }
+  }
+}
