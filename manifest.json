@@ -1,0 +1,9 @@
+{
+  "name": "image-scraper",
+  "version": "1.0.0",
+  "entry": "gui_scraper.py",
+  "interface": ["fetch", "extract"],
+  "description": "多源图片爬虫（A 模式源族 29 源），JSON 配置驱动，含代理获取/校验",
+  "python": "auto",
+  "kit": { "downloader": "^1" }
+}
