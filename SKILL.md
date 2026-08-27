@@ -31,4 +31,4 @@ agent_created: true
 - 敏感信息：API key 经 `{name}_KEY` 环境变量或运行参数注入；`config.json` 的 keys 字段保持空占位（不进仓）。
 - 测试：`selftest.py`（源加载/构造冒烟）与 `test_sources.py`（解析回归）；改 registry/engine 后必须全绿。
 - 与 crawl-hub 分工：image-scraper = A 模式（进程内、同语言、源族共享状态）；重依赖/易崩/自带 GUI 的爬虫走 B 模式（crawl-hub manifest + 子进程隔离）。
-- crawler-kit（P3 计划）：Downloader 将提炼为共享库，此处保留兼容导入。
+- crawler-kit（P3 已完成 2026-08-27）：Downloader 已提炼为共享库 `crawl-hub/crawler_kit/downloader.py`（通用 Task）；本仓保留内联副本（复制优于共享），两侧改动需手工对照（kit 侧 11 测试全绿）。
