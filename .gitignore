@@ -1,4 +1,4 @@
-images/
+﻿images/
 duitang/
 pixabay/
 midjourney/
@@ -7,3 +7,8 @@ meta/
 dl_out.txt
 .venv/
 __pycache__/
+
+# 未跟踪产物/输出治理（2026-08-28）
+*.spec
+build/
+dist/
