@@ -365,7 +365,7 @@ class JsonSource(SourceBase):
         out = []
         seen_detail = set()
         for it in items:
-            if len(out) >= max_images:
+            if len({u.get("url") if isinstance(u, dict) else str(u) for u in out}) >= max_images:
                 break
             durl = it.get("url") if isinstance(it, dict) else str(it)
             if not durl or durl in seen_detail:

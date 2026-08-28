@@ -100,7 +100,7 @@ $PY verify_proxy.py --proxy socks5://127.0.0.1:1080
 | civitai | REST API | GFW 需代理 | 无需 | SD 社区 |
 | lexica | POST API | GFW 需代理 | 无需 | SD 搜索 |
 | pixabay | HTML 解析 | 墙内可达 | 无需 | `fetch: curl` 绕过 Cloudflare 托管质询，自动升级 `_1280` 大图 |
-| giphy | HTML 提取 | 墙内可达 | 无需 | 动图站；搜索页提取 GIF ID → `media.giphy.com` 原图 `giphy.gif`；SSR 单查询约 36 张（官方 API 被墙且需 key） |
+| giphy | HTML 提取 | 墙内可达 | 无需 | 动图站；搜索页提取 GIF ID → 详情页 related **链式扩展**（去重后单查询可达数百张，实测 "cat" 423 张）；直链 `media.giphy.com` 原图 `giphy.gif`（官方 API 被墙且需 key） |
 
 > **GFW 提示**：Konachan / Wallhaven / Google / Pixiv / DeviantArt / Flickr / Pinterest / Civitai / Lexica 在中国被封锁，必须加 `--proxy socks5://127.0.0.1:1080`（或 http/https 代理）才能拉取。无代理时这些源会被 launcher **直接跳过**，不会卡等。
 

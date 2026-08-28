@@ -1,6 +1,6 @@
 {
   "name": "giphy",
-  "display": "Giphy 动图搜索 (墙内可达, 无需 key, 单查询约 36 张)",
+  "display": "Giphy 动图搜索 (墙内可达, 无需 key; 搜索页+详情页相关链式扩展, 单查询数百张)",
   "driver": "http",
   "needs_proxy": false,
   "request": {
@@ -17,12 +17,24 @@
     "format": "html",
     "url_extract": {
       "patterns": [
-        "https://giphy\\.com/gifs/[a-zA-Z0-9_-]+-([A-Za-z0-9]{10,})",
-        "https://giphy\\.com/gifs/([A-Za-z0-9]{10,})"
+        "https://giphy\\.com/gifs/[a-zA-Z0-9_-]+-[A-Za-z0-9]{10,}",
+        "https://giphy\\.com/gifs/[A-Za-z0-9]{10,}"
       ]
     },
+    "detail": {
+      "delay": 0.2,
+      "url_extract": {
+        "patterns": [
+          "https://media\\d?\\.giphy\\.com/media/[^/\"']+/([A-Za-z0-9_-]{8,})/giphy\\.(?:gif|webp)",
+          "https://media\\d?\\.giphy\\.com/media/([A-Za-z0-9_-]{8,})/giphy\\.gif",
+          "https://giphy\\.com/gifs/[a-zA-Z0-9_-]+-([A-Za-z0-9]{10,})",
+          "https://giphy\\.com/gifs/([A-Za-z0-9]{10,})"
+        ]
+      }
+    },
     "url_transform": [
-      {"op": "regex_replace", "pattern": "^(.*)$", "repl": "https://media.giphy.com/media/\\1/giphy.gif"}
+      {"op": "regex_replace", "pattern": "^https://giphy\\.com/gifs/[a-zA-Z0-9_-]*-?([A-Za-z0-9_-]{8,})$", "repl": "https://media.giphy.com/media/\\1/giphy.gif"},
+      {"op": "regex_replace", "pattern": "^([A-Za-z0-9_-]{8,})$", "repl": "https://media.giphy.com/media/\\1/giphy.gif"}
     ]
   },
   "item": {
