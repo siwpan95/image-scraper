@@ -24,7 +24,7 @@ agent_created: true
 ## 已并入源族的外部项目（谱系记账）
 
 - **photo**（2026-08-27 并入）：`photo.json` = 单页 URL + `<img>` 提取（网页爬取语义）；photo 桌面版（repos/photo）维持独立发行。
-- 16 个内置源 + webpage 通用源；新增源照 `photo.json` / `bing.json`（正则提取）/ `picsum.json`（JSON API）三种骨架。
+- 29 个专属源 + webpage 通用源（共 30 个）；新增源照 `photo.json` / `bing.json`（正则提取）/ `picsum.json`（JSON API）三种骨架；giphy 为「HTML 提取 ID → CDN 直链 transform」骨架（`selftest.py` 的 `ALL_SOURCES` 计数断言需随增源同步 +1）。
 
 ## 纪律
 

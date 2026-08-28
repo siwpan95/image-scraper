@@ -1,12 +1,12 @@
 # image-scraper · 多源图片爬虫
 
-从多个图片站统一抓取图片的命令行工具。基于 MidJourney 抓取器扩展而来，现支持 **16 个源**，统一调度、断点续传、防盗链绕过，并针对中国网络环境（GFW / 代理 / API key）做了优雅降级。
+从多个图片站统一抓取图片的命令行工具。基于 MidJourney 抓取器扩展而来，现支持 **30 个源**，统一调度、断点续传、防盗链绕过，并针对中国网络环境（GFW / 代理 / API key）做了优雅降级。
 
 ---
 
 ## 特性
 
-- **16 个图片源**：Midjourney、Bing、Safebooru、Konachan、Wallhaven、ArtStation、Google、Pixiv、DeviantArt、Flickr、Pinterest、Unsplash、Pexels、Civitai、Lexica、**Pixabay**
+- **30 个图片源**：Midjourney、Bing、Safebooru、Konachan、Wallhaven、ArtStation、Google、Pixiv、DeviantArt、Flickr、Pinterest、Unsplash、Pexels、Civitai、Lexica、Pixabay、**Giphy 动图**（完整清单见 `sources/json/`）
 - **统一调度**：`--source all` 并行跑全部源，按可达性自动跳过缺 key / 被墙源
 - **断点续传**：已下载的图片自动跳过
 - **防盗链绕过**：自动发送 `Referer`；Bing 等源从原图 URL 提取
@@ -80,7 +80,7 @@ $PY verify_proxy.py --proxy socks5://127.0.0.1:1080
 
 ---
 
-## 源清单（16 个）
+## 源清单（代表性节选；完整 30 个见 `sources/json/`）
 
 | 源 | 类型 | 可达性 | 认证 | 备注 |
 |---|---|---|---|---|
@@ -100,6 +100,7 @@ $PY verify_proxy.py --proxy socks5://127.0.0.1:1080
 | civitai | REST API | GFW 需代理 | 无需 | SD 社区 |
 | lexica | POST API | GFW 需代理 | 无需 | SD 搜索 |
 | pixabay | HTML 解析 | 墙内可达 | 无需 | `fetch: curl` 绕过 Cloudflare 托管质询，自动升级 `_1280` 大图 |
+| giphy | HTML 提取 | 墙内可达 | 无需 | 动图站；搜索页提取 GIF ID → `media.giphy.com` 原图 `giphy.gif`；SSR 单查询约 36 张（官方 API 被墙且需 key） |
 
 > **GFW 提示**：Konachan / Wallhaven / Google / Pixiv / DeviantArt / Flickr / Pinterest / Civitai / Lexica 在中国被封锁，必须加 `--proxy socks5://127.0.0.1:1080`（或 http/https 代理）才能拉取。无代理时这些源会被 launcher **直接跳过**，不会卡等。
 

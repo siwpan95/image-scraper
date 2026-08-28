@@ -271,7 +271,7 @@ async def test_full_flow():
 
 def main():
     print(f"已加载源: {len(ALL_SOURCES)} -> {ALL_SOURCES}\n")
-    assert len(ALL_SOURCES) == 28, f"期望 28 个源，实际 {len(ALL_SOURCES)}"
+    assert len(ALL_SOURCES) == 30, f"期望 30 个源，实际 {len(ALL_SOURCES)}"
 
     probs = check_regexes()
     if probs:
