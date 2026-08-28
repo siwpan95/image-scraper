@@ -1,4 +1,4 @@
-﻿images/
+images/
 duitang/
 pixabay/
 midjourney/
@@ -12,3 +12,4 @@ __pycache__/
 *.spec
 build/
 dist/
+probe_capture_*.json

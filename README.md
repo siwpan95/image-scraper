@@ -177,6 +177,39 @@ $PY verify_proxy.py --proxy socks5://127.0.0.1:1080 --no-baseline   # 跳过无�
 
 ---
 
+### 通用网络抓包探针（probe_capture.py）
+
+通用 **Playwright+Edge 无头抓包探针**：加载任意目标页并捕获其真实网络请求
+（媒体流 / API / 签名参数），静态 JS 分析解不开时的决定性手段。浏览器用系统
+Edge（自动发现 msedge.exe），无需 `playwright install` 下载内核。首次实战于
+real-url 直播平台逆向（六间房 / 央视频 / 抖音三条线的拉流证据均由同款方法抓到）。
+
+```bash
+$PY probe_capture.py <url> [选项]
+
+# 抓直播房间页媒体/接口请求，观测 15s
+$PY probe_capture.py https://v.6.cn/1111520
+
+# 移动端 UA + 点击播放器触发播放（不自动播的站点）
+$PY probe_capture.py "https://m.yangshipin.cn/tv?vid=2024078201&pid=600001859" --ua mobile --click 195,300
+
+# 自定义过滤 + 全量不过滤
+$PY probe_capture.py <url> --filter "m3u8|flv|webcast" --wait 20 --out out.json
+$PY probe_capture.py <url> --all
+```
+
+常用参数：`--ua desktop|mobile`、`--wait N`、`--click X,Y`（可多次）、
+`--js "EXPR"`（执行页面内 JS，播放器触发常用）、`--filter REGEX`、`--out PATH`、
+`--headed`、`--browser edge|chromium`。
+Edge 不在默认路径时用环境变量 `PROBE_EDGE=<msedge.exe>` 指定。默认启用
+`--autoplay-policy=no-user-gesture-required`（放行无手势自动播放）。
+输出 JSON：`{meta:{...}, captures:[{type,method,status,url,body}]}`
+（`body` 为命中响应前 4KB；输出文件不入库，见 .gitignore）。
+
+> 与图片源无关的独立通用工具，与 `verify_proxy.py` 一样位于项目顶层、不参与源调度。
+
+---
+
 ## GUI 版（tkinter）
 
 除命令行外，本项目附带图形界面 `gui_scraper.py`，直接复用 `mj_scraper.py` 的调度逻辑与 `sources.base` 的下载/元数据基础设施。
