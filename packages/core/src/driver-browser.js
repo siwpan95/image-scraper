@@ -159,6 +159,58 @@ class DriverBrowserService extends Service {
     return null
   }
 
+  /**
+   * 媒体标签注入下载：在已过 Cloudflare 的 www 页面上下文里创建 <img>/<video> 元素加载
+   * CDN 媒体，用 waitForResponse 捕获该响应的 body。
+   *
+   * 要点（实测结论）：
+   *  - 页内 fetch 不可用：cdn.midjourney.com 不回 Access-Control-Allow-Origin，跨域 fetch 拒读 body；
+   *  - 导航（page.goto 媒体直链）被 CF 拒（Sec-Fetch-Dest: document 的直链防盗链 403）；
+   *  - 前端同款方式（<img src=cdn...>）加载缩略图 —— 与页面 img srcs 一致，按媒体类型选标签；
+   *  - mp4 只能用 <video>（<img> 必 onerror），加载事件不等全量（canplay/metadata 即可，
+   *    body 由 waitForResponse 的 resp.body() 等待完整字节）。
+   */
+  async mediaFetch(page, url, log) {
+    try {
+      const urlBase = url.split('?')[0]
+      const isVideo = /\.(mp4|webm|m4v|mov)(\?|$)/i.test(urlBase)
+      const tag = isVideo ? 'video' : 'img'
+      const respP = page.waitForResponse(
+        (r) => r.url().split('?')[0] === urlBase && r.status() === 200,
+        { timeout: 25000 },
+      ).catch(() => null)
+      const loadOk = await page.evaluate(([u, t]) => new Promise((res) => {
+        let el
+        let settled = false
+        const fin = (v) => { if (!settled) { settled = true; res(v) } }
+        if (t === 'video') {
+          el = document.createElement('video')
+          el.muted = true
+          el.preload = 'auto'
+          el.onloadedmetadata = () => fin(true)
+          el.oncanplay = () => fin(true)
+        } else {
+          el = new Image()
+          el.onload = () => fin(true)
+        }
+        el.onerror = () => fin(false)
+        el.src = u
+        setTimeout(() => fin(false), 20000)
+      }), [url, tag])
+      const resp = await respP
+      if (resp) {
+        const body = await resp.body()
+        if (body && body.length > 300) return body
+        log.debug?.(`  mediaFetch body 过小 (${body ? body.length : 0}B): ${url.slice(0, 80)}`)
+      } else if (!loadOk) {
+        log.debug?.(`  mediaFetch 加载失败(${tag}): ${url.slice(0, 80)}`)
+      }
+    } catch (e) {
+      log.debug?.(`  mediaFetch 异常 ${url.slice(0, 80)}: ${e && e.message ? e.message : e}`)
+    }
+    return null
+  }
+
   async runSource({ def, ctxVars, proxy, maxImages, stats, sourceName, logger, o = {} }) {
     const log = logger || this.ctx.logger
     const name = sourceName || def.name
@@ -286,6 +338,22 @@ class DriverBrowserService extends Service {
       }
       log.info(`  CDN URL 模板: ${build.url_template || '?'}`)
 
+      // 诊断（debug）：job 结构 + 页面真实 <img> src（判断 CDN 可用形态）
+      try {
+        const first = Object.values(jobs)[0]
+        if (first) {
+          log.debug?.(`  job[0] keys: ${Object.keys(first).slice(0, 30).join(',')}`)
+          const it0 = Array.isArray(first.items) && first.items[0] ? first.items[0] : null
+          if (it0) {
+            log.debug?.(`  job[0].items[0] keys: ${Object.keys(it0).slice(0, 30).join(',')}`)
+          }
+        }
+        const srcs = await page.evaluate(() =>
+          Array.from(document.images).slice(0, 4).map((i) =>
+            ((i.currentSrc || i.src || '').slice(0, 100) + '|nw=' + i.naturalWidth)))
+        log.debug?.(`  页面 img srcs: ${JSON.stringify(srcs)}`)
+      } catch { /* ignore */ }
+
       // 变体下标：mj_index 优先，其次取链接中的 ?index=N
       let mjIndex = toInt(ctxVars.mj_index, 0)
       if (mjIndex < 0) mjIndex = 0
@@ -325,9 +393,19 @@ class DriverBrowserService extends Service {
             return
           }
           let content = await this.pageFetch(page, t.url, log)
+          if (!content) content = await this.mediaFetch(page, t.url, log)
+          if (!content && /\.mp4($|\?)/i.test(t.url) && t.meta && t.meta.job_id) {
+            // mp4 正片被 CDN 拒/不可达 → 回退到前端同款视频缩略图（页面已验证 <img> 可加载）
+            const thumb = t.url.replace(/\/video\/([^/]+)\/0\.mp4($|\?)/i, '/video/$1/0_640_N.webp')
+            if (thumb !== t.url) {
+              content = await this.mediaFetch(page, thumb, log)
+              if (content) fname = `${name}_${h}.webp`
+            }
+          }
           if (!content) {
             for (const fb of media.fallbacks(t.url, ['image', 'video'])) {
               content = await this.pageFetch(page, fb, log)
+              if (!content) content = await this.mediaFetch(page, fb, log)
               if (content) {
                 const e = path.extname(fb.split('?')[0]).toLowerCase()
                 if (media.isMedia(fb)) fname = `${name}_${h}${e}`

@@ -15,7 +15,7 @@ export default defineSource('source-midjourney_video', () => ({
     display: 'Midjourney Video Explore (浏览器)',
     driver: 'browser',
     needs_browser: true,
-    needs_proxy: true,
+    needs_proxy: false,
     media: 'video',
     browser: {
       explore_url: 'https://www.midjourney.com/explore',

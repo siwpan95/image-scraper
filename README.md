@@ -72,6 +72,26 @@ P3 已完成 **30 源全量插件化**（与 Python 版 30 个 JSON 配置一一
 - **视频/音频源**（pixabay_video / pixabay_music / midjourney_video×2）：
   产出 mp4/mp3，媒体类型由 `ctx.media` 判定（ffmpeg 后处理属 P4 `postprocess-video`）。
 
+P7 新增 **5 个免 key 墙内直连源**：`bing_daily` `cleveland_art` `met_museum`
+`nasa_images` `smk_dk`（全部实测 5/5 通过）。其中 met_museum 为两步流
+（objectIDs 列表页 → 逐对象 detail 抽 primaryImage），引擎为此新增
+`url_template` 抽取后模板拼接机制（`urls.map(u => subst(tpl, {url}))`，
+向后兼容）。方案调研与落地偏差记录见
+[`docs/NEW_SOURCES_RESEARCH.md`](docs/NEW_SOURCES_RESEARCH.md)。
+
+P7b 修正：**midjourney×4 源 `needs_proxy: true → false`**——对齐 Python 版
+legacy JSON 无 proxy 标记的事实：抓取仅访问 midjourney.com Explore 页，
+墙内直连 0.5–0.8s 可达（实测 `--source midjourney` 17.9s 全 200 / 100 jobs，
+视频源同样直连成功），此前标记为 GFW 源属误判。同时把缩略图后缀从已 404 的
+`_384_N.webp` 更新为现行 `_640_N.webp`。下载侧限制：图片 CDN
+（`www/cdn.midjourney.com`，Cloudflare）对 node fetch（bot 挑战 403）、
+页内 fetch（无 ACAO 头，CORS 拒绝）、直链导航（`Sec-Fetch-Dest: document`
+防盗链）均拒绝；`<img>` 标签形态的缩略图可真实加载（naturalWidth>0）。
+浏览器驱动下载链据此重构为：pageFetch（页内 JS fetch）→ mediaFetch
+（页内 img/video 标签注入捕获响应体）→ 视频缩略图回退（mp4 失败时取
+`0_640_N.webp`）→ fallbacks 扩展名链。完整原图下载需登录态 cookie
+（cf_clearance + MJ session）注入，后续迭代。
+
 ## 架构
 
 ```
@@ -80,7 +100,7 @@ L2 能力注册表  drivers · parsers · paginators
 L3 能力实现    driver-http · driver-curl · driver-browser · driver-browser-html
                parser-json · parser-html
                paginator-page · paginator-list · paginator-none · paginator-cursor
-L4 源注册表    sources（+ source-* ×30）
+L4 源注册表    sources（+ source-* ×35）
 L5 应用        scheduler · cli · web
 ```
 
@@ -123,8 +143,8 @@ node apps/cli/src/index.js --source webpage --url 'https://safebooru.org/index.p
 
 未安装 Playwright 时两个驱动**不注册**，挂载的浏览器源以
 `driver-unavailable:browser` / `driver-unavailable:browser_html` 点名下线，
-其余源零影响。midjourney 系源标记 `needs_proxy: true`，无 `--proxy` 时
-启动前即跳过（`needs-proxy`），不拉起浏览器。
+其余源零影响。midjourney 系源 `needs_proxy: false`（P7b 实测墙内直连可达），
+抓取阶段无需 `--proxy`；下载侧受 CDN Cloudflare 限制，现状与回退链见 P7b 段。
 
 ## 配置分层（取代 Python 版 config.json）
 

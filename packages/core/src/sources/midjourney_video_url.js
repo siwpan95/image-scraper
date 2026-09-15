@@ -14,7 +14,7 @@ export default defineSource('source-midjourney_video_url', () => ({
     display: 'Midjourney Video 指定链接 (浏览器)',
     driver: 'browser',
     needs_browser: true,
-    needs_proxy: true,
+    needs_proxy: false,
     require_content_url: true,
     media: 'video',
     browser: {

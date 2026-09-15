@@ -15,15 +15,16 @@ export default defineSource('source-midjourney_url', () => ({
     display: 'Midjourney 指定链接 (浏览器)',
     driver: 'browser',
     needs_browser: true,
-    needs_proxy: true,
+    needs_proxy: false,
     require_content_url: true,
     media: 'image',
     browser: {
       explore_url: 'https://www.midjourney.com/explore',
       api_path: '/api/explore',
       cdn: 'https://cdn.midjourney.com',
+      // 2026-09 实测：旧 _384_N 后缀已 404，前端现用 _640_N 缩略图
       size_suffix: {
-        thumb: '_384_N.webp',
+        thumb: '_640_N.webp',
         medium: '_1024_N.webp',
         original: '.png',
         original_webp: '.webp',
