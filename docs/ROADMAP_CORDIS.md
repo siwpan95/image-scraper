@@ -360,7 +360,7 @@ CLI 侧：
 | **P3 源插件化** ✅ | 30 个源成插件 | `source-*` ×30 + schema + 自动 CLI | 全部 28 个非浏览器源可跑；`_build_ctx` 概念消失 |
 | **P4 浏览器 + 视频** ✅ | 两个重点 | `driver-browser` / `driver-browser-html` / `media`（probe、postprocess-video 记为后续，见 ACCEPTANCE_P4 §5） | browser_html 端到端实测闭环（safebooru 5/5）；browser 驱动装配 + needs-proxy 降级路径验证；`disabled`/未装 Playwright 时浏览器源干净下线且**不报错、不影响其余源**；midjourney 完整链路留待代理环境回归 |
 | **P5 应用层** ✅ | CLI / Web 面板 / 调度 / 重投 / 自检 | `cli` / `scheduler` / `retry` / `verify` / `web`（tkinter GUI 按决策改为 Web 面板） | `--retry-failed` 与现状等价（含链式重投）；`--verify-proxy` 等价且判定收紧为网络可达性；面板 `/`+`/api/sources`+`/api/run`+`/api/status`+`/api/logtail` 闭环 |
-| **P6 门禁与交付** | 可回归 | `harness/`（不变量）+ `scripts/check.mjs` + 打包（对齐 `.iss`/`.bat` 习惯） | 不变量全绿；与 Python 版回归报告 |
+| **P6 门禁与交付** ✅ | 可回归 | `harness/`（不变量，node:test）+ `scripts/check.mjs`（打包记为后续，见 ACCEPTANCE_P6 §4） | `npm run check` 全绿：语法 / yml / 15 项不变量（数据守恒、事件配对、跨运行去重、Python 哈希一致）/ 装配冒烟 |
 
 每阶段独立可验收，P1 结束时即可跑真实抓取——**不必等全部完成**。
 

@@ -40,6 +40,18 @@ Web 面板（`--serve` 后访问 `http://127.0.0.1:8642/`）：勾选源 → 填
 运行，实时看每源统计与日志尾部；接口：`/api/sources` `/api/run`
 `/api/status` `/api/logtail`。
 
+## 测试与门禁
+
+```bash
+npm run check        # 语法 + cordis.yml 校验 + harness 单测（15 项不变量）+ 装配冒烟
+npm run check:fast   # 跳过单测与冒烟
+npm test             # 仅 harness（node:test）
+```
+
+不变量固化：数据守恒（`fetched ≥ downloaded + skipped + errors`）、
+跨运行去重、失败清单 `write → read` 链路、事件配对
+（registered ↔ unregistered）、与 Python 版一致的 md5 命名。
+
 首批（P0–P2）已迁移 7 个源：`bing` `duitang` `giphy` `picsum`
 `pixabay_illustration` `pixabay_vector` `safebooru`。
 

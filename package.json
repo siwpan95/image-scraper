@@ -13,6 +13,9 @@
   "scripts": {
     "start": "npm start --workspace @scraper/cli",
     "story": "npm run start --workspace @scraper/cli --",
+    "test": "node --test",
+    "check": "node scripts/check.mjs",
+    "check:fast": "node scripts/check.mjs --fast",
     "dump-config": "node apps/cli/scripts/dump-config.mjs"
   },
   "dependencies": {
