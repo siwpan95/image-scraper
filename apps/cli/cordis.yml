@@ -160,5 +160,11 @@ plugins:
   - id: scheduler
     module: './scheduler.js'
 
+  # Web 面板（--serve 时长驻；一次性 CLI 运行时也装配但随进程退出即关闭）
+  - id: web
+    module: './web.js'
+    config:
+      port: 8642
+
   - id: cli
     module: './cli.js'

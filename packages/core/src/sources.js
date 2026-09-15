@@ -322,9 +322,131 @@ class SourcesService extends Service {
     )
     return { ok: true, name, stats }
   }
+
+  /**
+   * 重投失败清单（对齐 Python retry_failed）：直接把清单里的 URL 交给下载器，
+   * 不重新 fetch_tasks，对网络/站点更友好。仍失败则导出
+   * meta/failed_retry_<源>_<ts>.json，可继续链式重投。
+   * @param {string} file meta/failed_*.json 路径
+   */
+  async retryFailed(file, o = {}) {
+    const log = this.ctx.logger
+    let data
+    try {
+      data = this.ctx.storage.readFailed(file)
+    } catch (e) {
+      return { ok: false, name: 'retry', reason: 'error', message: '读取失败清单出错: ' + (e && e.message ? e.message : e) }
+    }
+    const items = Array.isArray(data.tasks) ? data.tasks : []
+    const srcName = data.source || 'retried'
+    if (!items.length) {
+      log.warn(`失败清单为空: ${file}`)
+      return { ok: true, name: 'retry', stats: makeStats() }
+    }
+    const tasks = items
+      .filter((it) => it && it.url)
+      .map((it) => ({
+        url: it.url,
+        source: it.source || srcName,
+        title: it.title || '',
+        author: it.author || '',
+        width: it.width || 0,
+        height: it.height || 0,
+        referer: it.referer || '',
+        meta: it.meta || {},
+      }))
+    const stats = makeStats()
+    stats.startTime = Date.now() / 1000
+    stats.fetched = tasks.length
+    log.info(`重投模式 | 清单: ${file} | 源=${srcName} | 任务 ${tasks.length}`)
+
+    const session = this.ctx.downloader.session(srcName, {
+      concurrency: o.concurrency,
+      retries: o.retries,
+      rateLimit: o.rateLimit,
+      speedLimit: o.speedLimit,
+      proxy: o.proxy ?? '',
+    })
+    const completed = await session.downloadBatch(tasks, stats)
+    stats.endTime = Date.now() / 1000
+    const meta = this.ctx.storage.writeMeta(srcName, stats, completed)
+    log.info(`  元数据: ${meta.file} (${meta.count} imgs)`)
+    if (session.failed.length) {
+      const f = this.ctx.storage.writeFailed('retry_' + srcName, session.failed)
+      log.warn(`  仍有 ${f.count} 个失败，已导出: ${f.file}`)
+    }
+    log.info(
+      `重投完成 ${(stats.endTime - stats.startTime).toFixed(1)}s | 总 ${tasks.length} | ` +
+      `下载 ${stats.downloaded} | 跳过 ${stats.skipped} | 失败 ${stats.errors}`,
+    )
+    return { ok: true, name: 'retry', stats }
+  }
+
+  /**
+   * GFW 源代理一键验证（对齐 Python verify_proxy.py，判定改为网络可达性）：
+   * 对每个 needs_proxy 源用其 API URL 经代理发一次轻量请求（不解析、不下载）。
+   *   OK    = HTTP 200
+   *   REACH = 收到非 200 响应（403/503 等）——代理通，站点侧拒绝（缺 key/反爬）
+   *   TIMEOUT / FAIL = 代理无效或网络不可达
+   * browser 通道源只提供全流程入口，此处 SKIP。
+   */
+  async verifyProxy(proxy, o = {}) {
+    const log = this.ctx.logger
+    const timeoutMs = (o.timeout ?? 25) * 1000
+    const defs = [...this.defs.values()].filter((d) => d.needs_proxy)
+    log.info(`代理验证 | proxy=${proxy} | GFW 源 ${defs.length} 个 | 超时 ${timeoutMs / 1000}s`)
+    const rows = []
+    let okCount = 0
+    for (const def of defs) {
+      const transport = def.fetch === 'curl'
+        ? 'curl'
+        : (def.driver === 'browser' || def.driver === 'browser_html') ? def.driver : 'http'
+      const t0 = Date.now()
+      let status, detail
+      if (transport === 'browser' || transport === 'browser_html') {
+        status = 'SKIP'; detail = '浏览器源请用运行模式验证（驱动只提供全流程入口）'
+      } else if (transport === 'curl') {
+        status = 'SKIP'; detail = 'curl 通道源暂不参与验证（GFW 源中无 curl 通道）'
+      } else {
+        try {
+          const ctxVars = this.templateVars(def, { ...o, maxImages: 3 })
+          const req = def.request || {}
+          const url = subst(req.url || '', ctxVars)
+          const params = substAny(req.params || {}, ctxVars)
+          const headers = { ...(req.headers || {}) }
+          if (req.skip_empty_params) {
+            for (const k of Object.keys(params)) if (params[k] === '' || params[k] == null) delete params[k]
+            for (const k of Object.keys(headers)) if (headers[k] === '' || headers[k] == null) delete headers[k]
+          }
+          const method = String(req.method || 'GET').toUpperCase()
+          const body = req.body ? substAny(req.body, ctxVars) : undefined
+          const send = transport === 'curl'
+            ? this.ctx.drivers.resolve('curl').probe(url, { method, params, headers, body, proxy })
+            : this.ctx.http.request(url, { method, params, headers, body, proxy })
+          const r = await Promise.race([
+            send,
+            new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' })), timeoutMs)),
+          ])
+          if (r.status === 200) { status = 'OK'; detail = 'HTTP 200' }
+          else if (r.status > 0) { status = 'REACH'; detail = `HTTP ${r.status}${r.error ? ' — ' + r.error : ''}` }
+          else { status = 'FAIL'; detail = r.error || '网络不可达' }
+        } catch (e) {
+          status = e && e.code === 'ETIMEDOUT' ? 'TIMEOUT' : 'FAIL'
+          detail = (e && e.message ? e.message : String(e)).slice(0, 60)
+        }
+      }
+      const elapsed = (Date.now() - t0) / 1000
+      if (status === 'OK' || status === 'REACH') okCount += 1
+      const flag = status === 'OK' ? '✓' : (status === 'REACH' ? '○' : (status === 'SKIP' ? '-' : '✗'))
+      log.info(`  ${def.name.padEnd(16)} ${flag} ${status.padEnd(8)} ${elapsed.toFixed(1)}s  ${detail}`)
+      rows.push({ name: def.name, status, elapsed, detail })
+    }
+    log.info(`结论: ${okCount}/${defs.length} 个 GFW 源经代理可达 (proxy=${proxy})`)
+    return { ok: true, name: 'verify-proxy', rows, okCount, total: defs.length }
+  }
 }
 
-SourcesService.inject = ['config', 'settings', 'proxy', 'downloader', 'storage', 'drivers', 'parsers', 'paginators', 'logfile']
+SourcesService.inject = ['config', 'settings', 'proxy', 'http', 'downloader', 'storage', 'drivers', 'parsers', 'paginators', 'logfile']
 
 export default function sourcesPlugin(ctx, cfg) {
   ctx.plugin(SourcesService, cfg)

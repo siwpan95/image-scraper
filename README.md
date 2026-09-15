@@ -25,9 +25,20 @@ node apps/cli/src/index.js --source all --max-images 5
 --pages N           翻页数
 --tags / --booru-rating / --booru-limit / --booru-exclude   booru 系参数
 --proxy <url>       代理（http/https/socks5；仅对 needs_proxy 的源自动启用）
+--retry-failed PATH 重投失败清单（meta/failed_*.json，直接下载不再抓取）
+--verify-proxy URL  一键验证 GFW 源经代理可达性（OK/REACH/TIMEOUT/FAIL/SKIP）
+--serve             启动 Web 面板长驻（端口见 cordis.yml web.config.port）
 --dump-config       打印插件树后退出
 --list-sources      列出已挂载源后退出
 ```
+
+下载失败的 URL 自动导出 `meta/failed_<源>_<时间>.json`，用
+`--retry-failed` 一键重投（不再重新抓取任务）；重投后仍有失败的会导出
+`meta/failed_retry_*.json`，可继续链式重投。
+
+Web 面板（`--serve` 后访问 `http://127.0.0.1:8642/`）：勾选源 → 填参数 →
+运行，实时看每源统计与日志尾部；接口：`/api/sources` `/api/run`
+`/api/status` `/api/logtail`。
 
 首批（P0–P2）已迁移 7 个源：`bing` `duitang` `giphy` `picsum`
 `pixabay_illustration` `pixabay_vector` `safebooru`。
@@ -55,7 +66,7 @@ L3 能力实现    driver-http · driver-curl · driver-browser · driver-browse
                parser-json · parser-html
                paginator-page · paginator-list · paginator-none · paginator-cursor
 L4 源注册表    sources（+ source-* ×30）
-L5 应用        scheduler · cli
+L5 应用        scheduler · cli · web
 ```
 
 全部 55 个插件装配在 [`apps/cli/cordis.yml`](apps/cli/cordis.yml)。

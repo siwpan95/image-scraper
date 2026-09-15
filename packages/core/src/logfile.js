@@ -76,6 +76,18 @@ class LogfileService extends Service {
     return this.errors.slice()
   }
 
+  /** 最近 n 行日志（文件上限 2MB，整读可接受；供 Web 面板 logtail） */
+  tail(n = 80) {
+    try {
+      const buf = fs.readFileSync(this.file)
+      const lines = buf.toString('utf8').split('\n')
+      while (lines.length && !lines[lines.length - 1]) lines.pop()
+      return lines.slice(-n)
+    } catch {
+      return []
+    }
+  }
+
   status() {
     return { file: this.file, bytes: this.bytes, errors: this.errors.length }
   }

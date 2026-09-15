@@ -31,9 +31,17 @@ class CliService extends Service {
     super(ctx, 'cli')
     // ready 由 loader 在全部插件应用后发出
     ctx.on('ready', () => {
-      this.main().catch((e) => {
+      this.main().then((serve) => {
+        if (serve) return // 长驻模式：Web 面板 server 撑住事件循环，等 SIGINT
+        // 一次性 CLI：主动触发 dispose（关闭单例浏览器/HTTP server 等长活句柄）后退出。
+        // 若放任自然退出，Playwright 等残留连接断开时会抛 unhandledRejection，
+        // 触发 fail-loud 分支把退出码污染成 1。
+        ctx.emit('dispose')
+        setTimeout(() => process.exit(process.exitCode || 0), 500)
+      }).catch((e) => {
         ctx.logger.error('[cli] 执行失败: ' + (e && e.stack ? e.stack : e))
         process.exitCode = 1
+        setTimeout(() => process.exit(1), 500)
       })
     })
   }
@@ -61,6 +69,10 @@ class CliService extends Service {
       '  --booru-limit N       booru 每页条数',
       '  --booru-exclude <a,b> 标签黑名单（逗号分隔，转 -tag）',
       '  --url <url>           指定网页（webpage 源）',
+      '  --retry-failed PATH   重投失败清单 JSON（meta/failed_*.json，直接下载不再抓取）',
+      '  --verify-proxy URL    一键验证 GFW 源经代理可达性（OK/EMPTY/TIMEOUT/FAIL）',
+      '  --timeout N           verify-proxy 每源超时秒数（默认 25）',
+      '  --serve               启动 Web 面板长驻（端口见 cordis.yml web.config.port）',
       '  --nsfw                包含 NSFW',
       '  --dump-config         打印插件树后退出',
       '  --list-sources        列出已挂载源后退出',
@@ -91,6 +103,13 @@ class CliService extends Service {
   async main() {
     const args = parseArgs(process.argv.slice(2))
     const log = this.ctx.logger
+
+    // Web 面板长驻模式：server 已随插件装配启动，这里只需不退出
+    if (args.serve) {
+      const port = this.ctx.web ? this.ctx.web.port : '(未装配)'
+      log.info('Web 面板长驻模式: http://127.0.0.1:' + port + '/ （Ctrl+C 退出）')
+      return true
+    }
 
     if (args.help || args.h) { console.log(this.help()); return }
     if (args['dump-config']) { console.log(this.dumpConfig()); return }
@@ -129,6 +148,28 @@ class CliService extends Service {
       opts.explicitProxy = true
     }
 
+    // 重投失败清单：直接下载，不再重新抓取任务（对齐 Python --retry-failed）
+    if (args['retry-failed']) {
+      const r = await this.ctx.sources.retryFailed(String(args['retry-failed']), opts)
+      if (r.ok) {
+        const s = r.stats
+        log.info(`重投结果: 总 ${s.fetched} | 下载 ${s.downloaded} | 跳过 ${s.skipped} | 失败 ${s.errors}`)
+      } else {
+        log.error('重投失败: ' + (r.message || r.reason))
+        process.exitCode = 1
+      }
+      return
+    }
+
+    // GFW 源代理一键验证（对齐 Python verify_proxy.py）
+    if (args['verify-proxy']) {
+      const r = await this.ctx.sources.verifyProxy(String(args['verify-proxy']), {
+        timeout: num(args.timeout),
+      })
+      if (!r.ok || (r.total > 0 && r.okCount === 0)) process.exitCode = 1
+      return
+    }
+
     // 选择源
     const available = this.ctx.sources.names()
     let targets
@@ -164,17 +205,12 @@ class CliService extends Service {
     log.info(`总耗时: ${((Date.now() - t0) / 1000).toFixed(1)}s`)
     log.info('='.repeat(64))
 
-    // 一次性 CLI：主动触发 dispose（关闭单例浏览器等长活句柄）后退出。
-    // 若放任自然退出，Playwright 等残留连接断开时会抛 unhandledRejection，
-    // 触发 fail-loud 分支把退出码污染成 1。
-    this.ctx.emit('dispose')
     const failed = Object.values(results).filter((r) => !r.ok)
-    const code = failed.length === targets.length ? 1 : 0
-    setTimeout(() => process.exit(code), 500)
+    if (failed.length === targets.length) process.exitCode = 1
   }
 }
 
-CliService.inject = ['sources', 'scheduler', 'logfile']
+CliService.inject = ['sources', 'scheduler', 'web', 'logfile']
 
 export default function cliPlugin(ctx, cfg) {
   ctx.plugin(CliService, cfg)
