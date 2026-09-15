@@ -1,0 +1,16 @@
+{
+  "name": "@scraper/core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "多源图片爬虫公共核心：声明式 loader（!!js / 行式 / patch / HMR / 启动审计）、L1 服务层、L2 能力注册表（驱动·解析器·分页器）、JSON 声明式引擎、源插件实现",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "schemastery": "^3.18.0",
+    "undici": "^7.3.0"
+  },
+  "exports": {
+    ".": "./src/loader.js",
+    "./src/*": "./src/*"
+  }
+}

@@ -1,0 +1,112 @@
+# image-scraper · Cordis 插件树（一切皆插件）
+#
+# 装配纪律（与 private-radio-stations 的 @relay/core loader 一致）：
+#   - 行式配置：{ id, module?, config?, disabled?, hot? }；
+#   - **顺序即拓扑**：loader 逐行 await fiber，被依赖者必须排在依赖者之前；
+#   - 应用后审计：每个 id 必须注册同名 Service（ctx[id]），缺失即点名抛错；
+#   - 本地差异写 cordis.patch.yml（不入库），可用 CORDIS_PATCH 追加。
+#
+# 「删一行即少一个能力」——例如把 driver-curl 整行删掉，
+#   pixabay 系源会因 inject 级联自动下线，其余源不受影响。
+
+plugins:
+  # ── L1 基础服务 ──────────────────────────────────────────────
+  # 必须第一个：其余所有插件都注入 ctx.config
+  - id: config
+    module: '@scraper/core/src/config.js'
+    config:
+      root: !!js "path.resolve(__dirname, '..', '..')"   # apps/cli → 仓库根（images/ 与 meta/ 所在地）
+      outputDir: images
+      metaDir: meta
+      defaults:
+        maxImages: 100
+        concurrency: 5
+        retries: 3
+
+  - id: logfile
+    module: '@scraper/core/src/logfile.js'
+    config:
+      file: data/logs/scraper.log
+
+  # 凭据与代理的分层设置（取代 Python 版 config.json）：
+  #   schema 默认 < 这里的 base < 用户文档 data/settings.json
+  # API Key 建议写在 patch（不入库），或直接进 data/settings.json
+  - id: settings
+    module: '@scraper/core/src/settings.js'
+
+  - id: proxy
+    module: '@scraper/core/src/proxy.js'
+
+  - id: http
+    module: '@scraper/core/src/http.js'
+
+  - id: curl
+    module: '@scraper/core/src/curl.js'
+
+  - id: media
+    module: '@scraper/core/src/media.js'
+
+  - id: storage
+    module: '@scraper/core/src/storage.js'
+
+  - id: downloader
+    module: '@scraper/core/src/downloader.js'
+
+  # ── L2 能力注册表 ────────────────────────────────────────────
+  - id: drivers
+    module: '@scraper/core/src/drivers.js'
+  - id: parsers
+    module: '@scraper/core/src/parsers.js'
+  - id: paginators
+    module: '@scraper/core/src/paginators.js'
+
+  # ── L3 能力实现（可整体拔插）─────────────────────────────────
+  - id: parser-json
+    module: '@scraper/core/src/parser-json.js'
+  - id: parser-html
+    module: '@scraper/core/src/parser-html.js'
+  - id: paginator-page
+    module: '@scraper/core/src/paginator-page.js'
+  - id: paginator-list
+    module: '@scraper/core/src/paginator-list.js'
+  - id: paginator-none
+    module: '@scraper/core/src/paginator-none.js'
+  - id: paginator-cursor
+    module: '@scraper/core/src/paginator-cursor.js'
+  - id: driver-http
+    module: '@scraper/core/src/driver-http.js'
+  - id: driver-curl
+    module: '@scraper/core/src/driver-curl.js'
+  # P4：driver-browser / driver-browser-html / postprocess-video 挂在这里
+
+  # ── L4 源注册表 + 源插件 ─────────────────────────────────────
+  - id: sources
+    module: '@scraper/core/src/sources.js'
+
+  # 首批（P0–P2）：与 Python 版已验证可用的 7 个源对齐
+  - id: source-picsum
+    module: '@scraper/core/src/sources/picsum.js'
+  - id: source-bing
+    module: '@scraper/core/src/sources/bing.js'
+  - id: source-duitang
+    module: '@scraper/core/src/sources/duitang.js'
+  - id: source-giphy
+    module: '@scraper/core/src/sources/giphy.js'
+  - id: source-safebooru
+    module: '@scraper/core/src/sources/safebooru.js'
+    config:
+      tags: art
+      rating: s
+  - id: source-pixabay_illustration
+    module: '@scraper/core/src/sources/pixabay_illustration.js'
+  - id: source-pixabay_vector
+    module: '@scraper/core/src/sources/pixabay_vector.js'
+  # P3：其余 23 个源按同样方式逐行加入
+
+  # ── L5 应用 ─────────────────────────────────────────────────
+  # module 相对 pluginsDir（apps/cli/src/plugins）解析
+  - id: scheduler
+    module: './scheduler.js'
+
+  - id: cli
+    module: './cli.js'
