@@ -51,13 +51,14 @@ P3 已完成 **30 源全量插件化**（与 Python 版 30 个 JSON 配置一一
 ```
 L1 基础服务    config · logfile · settings · proxy · http · curl · media · storage · downloader
 L2 能力注册表  drivers · parsers · paginators
-L3 能力实现    driver-http · driver-curl · parser-json · parser-html
+L3 能力实现    driver-http · driver-curl · driver-browser · driver-browser-html
+               parser-json · parser-html
                paginator-page · paginator-list · paginator-none · paginator-cursor
-L4 源注册表    sources（+ source-* ×7）
+L4 源注册表    sources（+ source-* ×30）
 L5 应用        scheduler · cli
 ```
 
-全部 30 个插件装配在 [`apps/cli/cordis.yml`](apps/cli/cordis.yml)。
+全部 55 个插件装配在 [`apps/cli/cordis.yml`](apps/cli/cordis.yml)。
 共享实现在 [`packages/core/src/`](packages/core/src/)；app 侧
 `src/plugins/<id>.js` 只做薄转发。
 
@@ -83,6 +84,21 @@ L5 应用        scheduler · cli
 
 依赖 curl 通道的 pixabay 系源会因 `inject` 级联**自动下线**并在日志点名
 （`driver-unavailable:curl`），其余源完全不受影响。
+
+### 浏览器驱动（可选依赖）
+
+`driver-browser`（Playwright 全流程，midjourney 系）与 `driver-browser-html`
+（浏览器取 HTML 后走常规解析，webpage/photo）依赖 **Playwright**：
+
+```bash
+npm i playwright && npx playwright install chromium   # 在 apps/cli 下
+node apps/cli/src/index.js --source webpage --url 'https://safebooru.org/index.php?page=post&s=list' --max-images 5
+```
+
+未安装 Playwright 时两个驱动**不注册**，挂载的浏览器源以
+`driver-unavailable:browser` / `driver-unavailable:browser_html` 点名下线，
+其余源零影响。midjourney 系源标记 `needs_proxy: true`，无 `--proxy` 时
+启动前即跳过（`needs-proxy`），不拉起浏览器。
 
 ## 配置分层（取代 Python 版 config.json）
 

@@ -14,5 +14,8 @@
     "start": "npm start --workspace @scraper/cli",
     "story": "npm run start --workspace @scraper/cli --",
     "dump-config": "node apps/cli/scripts/dump-config.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.63.0"
   }
 }

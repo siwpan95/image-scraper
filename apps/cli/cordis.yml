@@ -77,7 +77,11 @@ plugins:
     module: '@scraper/core/src/driver-http.js'
   - id: driver-curl
     module: '@scraper/core/src/driver-curl.js'
-  # P4：driver-browser / driver-browser-html / postprocess-video 挂在这里
+  # P4：Playwright 未安装时这两个驱动不注册（browser 系源自动下线，HTTP 源不受影响）
+  - id: driver-browser
+    module: '@scraper/core/src/driver-browser.js'
+  - id: driver-browser-html
+    module: '@scraper/core/src/driver-browser-html.js'
 
   # ── L4 源注册表 + 源插件 ─────────────────────────────────────
   - id: sources

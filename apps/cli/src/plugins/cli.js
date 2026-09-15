@@ -164,8 +164,13 @@ class CliService extends Service {
     log.info(`总耗时: ${((Date.now() - t0) / 1000).toFixed(1)}s`)
     log.info('='.repeat(64))
 
+    // 一次性 CLI：主动触发 dispose（关闭单例浏览器等长活句柄）后退出。
+    // 若放任自然退出，Playwright 等残留连接断开时会抛 unhandledRejection，
+    // 触发 fail-loud 分支把退出码污染成 1。
+    this.ctx.emit('dispose')
     const failed = Object.values(results).filter((r) => !r.ok)
-    if (failed.length === targets.length) process.exitCode = 1
+    const code = failed.length === targets.length ? 1 : 0
+    setTimeout(() => process.exit(code), 500)
   }
 }
 

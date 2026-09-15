@@ -249,6 +249,39 @@ class SourcesService extends Service {
       log.warn(`  [${name}] 未提供 API Key，回退到网页抓取(alt)；若该源已启用反爬(Anubis/Cloudflare 等)，可能返回 0 结果。`)
     }
 
+    // ── 浏览器型源：分页/反爬/下载全流程由驱动承担（对齐 Python _run_browser* 独立分支）──
+    if (transport === 'browser' || transport === 'browser_html') {
+      if (!driver.runSource) {
+        log.warn(`源 [${name}] 跳过：驱动 "${transport}" 不支持全流程运行`)
+        return { ok: false, name, reason: 'driver-incompatible' }
+      }
+      try {
+        const r = await driver.runSource({
+          def, active, ctxVars, proxy, maxImages: o.maxImages ?? 100, stats, logger: log, o,
+        })
+        stats.fetched = r.fetched
+        if (r.completed && r.completed.length) {
+          const meta = this.ctx.storage.writeMeta(name, stats, r.completed)
+          log.info(`  元数据: ${meta.file} (${meta.count} imgs)`)
+        }
+        if (r.failed && r.failed.length) {
+          const f = this.ctx.storage.writeFailed(name, r.failed)
+          log.warn(`  失败清单已导出: ${f.file} (${f.count} 个 URL，可用 --retry-failed 重投)`)
+        }
+        if (!r.fetched) log.warn(`  源 [${name}] 无任务`)
+      } catch (e) {
+        stats.endTime = Date.now() / 1000
+        log.error(`源 [${name}] 异常: ${e && e.stack ? e.stack : e}`)
+        return { ok: false, name, reason: 'error', message: e && e.message ? e.message : String(e), stats }
+      }
+      stats.endTime = Date.now() / 1000
+      log.info(
+        `[${name}] 完成 ${(stats.endTime - stats.startTime).toFixed(1)}s | ` +
+        `获取 ${stats.fetched} | 下载 ${stats.downloaded} | 跳过 ${stats.skipped} | 失败 ${stats.errors}`,
+      )
+      return { ok: true, name, stats }
+    }
+
     const state = { lastJson: null }
 
     try {
