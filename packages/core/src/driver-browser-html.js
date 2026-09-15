@@ -165,7 +165,7 @@ class DriverBrowserHtmlService extends Service {
           url = url + ((url.includes('?')) ? '&' : '?') + q
         }
         const headers = Object.fromEntries(
-          Object.entries(req.headers || {}).filter(([, v]) => v !== null && v !== ''),
+          Object.entries(substAny(req.headers || {}, pageMap)).filter(([, v]) => v !== null && v !== ''),
         )
         if (!url || !url.startsWith('http')) {
           log.warn(`  [${name}] 无效分页 URL: '${url ? url.slice(0, 80) : '(空)'}'`)

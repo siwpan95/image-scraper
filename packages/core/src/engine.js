@@ -274,6 +274,8 @@ export function extractHtml(html, parse, pageUrl = '', { sourceName = '', logger
     for (const [k, v] of Object.entries(post)) {
       urls = urls.map((u) => String(u).split(k).join(v))
     }
+    // url_template：对抽取值做 {url} 模板拼接（如 met_museum：抽 objectIDs 数组元素 → 拼 objects 详情 URL）
+    if (ue.url_template) urls = urls.map((u) => subst(ue.url_template, { url: u }))
     if (ue.url_decode) urls = urls.map((u) => { try { return decodeURIComponent(u) } catch { return u } })
     urls = urls.map((u) => String(u).trim()).filter((u) => u && u.trim())
     // 相对 URL 解析为绝对 URL（含 <base href> 支持）

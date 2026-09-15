@@ -34,7 +34,8 @@ class HttpDriverService extends Service {
     }
 
     let params = substAny(req.params || {}, mapping)
-    const headers = { ...(req.headers || {}) }
+    // headers 同样要做 {var} 替换（如 unsplash 的 'Client-ID {key}'），否则字面量原样发出必 401
+    const headers = substAny(req.headers || {}, mapping)
     if (mapping.page !== undefined && mapping.page !== null && pag.param) params[pag.param] = mapping.page
     if (mapping.cursor !== undefined && mapping.cursor !== null && pag.param) params[pag.param] = mapping.cursor
 

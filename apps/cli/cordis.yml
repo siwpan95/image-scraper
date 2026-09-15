@@ -152,6 +152,18 @@ plugins:
     module: '@scraper/core/src/sources/unsplash.js'
   - id: source-wallhaven
     module: '@scraper/core/src/sources/wallhaven.js'
+
+  # P7：新源批次（调研 docs/NEW_SOURCES_RESEARCH.md，全部免 key、墙内直连可用）
+  - id: source-bing_daily
+    module: '@scraper/core/src/sources/bing_daily.js'
+  - id: source-cleveland_art
+    module: '@scraper/core/src/sources/cleveland_art.js'
+  - id: source-met_museum
+    module: '@scraper/core/src/sources/met_museum.js'
+  - id: source-nasa_images
+    module: '@scraper/core/src/sources/nasa_images.js'
+  - id: source-smk_dk
+    module: '@scraper/core/src/sources/smk_dk.js'
   - id: source-webpage
     module: '@scraper/core/src/sources/webpage.js'
 

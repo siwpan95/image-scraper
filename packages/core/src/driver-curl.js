@@ -52,7 +52,7 @@ class CurlDriverService extends Service {
     }
 
     let params = substAny(req.params || {}, mapping)
-    const headers = { ...(req.headers || {}) }
+    const headers = substAny(req.headers || {}, mapping)
     if (mapping.page !== undefined && mapping.page !== null && pag.param) params[pag.param] = mapping.page
     if (mapping.cursor !== undefined && mapping.cursor !== null && pag.param) params[pag.param] = mapping.cursor
 

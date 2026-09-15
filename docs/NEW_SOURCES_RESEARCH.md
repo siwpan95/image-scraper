@@ -42,3 +42,27 @@ fetch('https://openaccess-api.clevelandart.org/api/artworks/?cc0=1&has_image=1&l
 fetch('https://images-api.nasa.gov/search?q=galaxy&media_type=image&page_size=2')  // 200 / 0.56s
 fetch('https://api.openverse.org/v1/images/?q=cat&page_size=2')  // ConnectTimeout → 排除
 ```
+
+## 5. 落地记录与方案偏差（P7，2026-09-15）
+
+实测结果：`bing_daily` 5/5（1.3s）｜`cleveland_art` 5/5（3.9s）｜`nasa_images` 5/5（5.6s）｜
+`met_museum` 5/5（5.7s）｜`smk_dk` 5/5（4.8s）｜全源回归 `--source all` 16.2s 全绿。
+
+与原方案的偏差（实现时以真实响应为准）：
+
+1. **met_museum 第一层改用 html 正则 + `url_template`**：search 响应是
+   `{"total":N,"objectIDs":[...]}`（复数数组字段），原设想的 `list_path + item.url template`
+   无法在 `resolveDetailLinks`（要求条目本身是详情 URL）前拼接前缀。
+   落地方案：`extractHtml` 新增 `url_template` 支持（对每个抽取值做 `{url}` 模板拼接，向后兼容），
+   正则 `(?<="objectIDs":\[|,)\d+(?=,|\])` 精确抽数组元素（`total` 的数字不误匹配），
+   detail 正则抽 `primaryImage`（原图）与 `primaryImageSmall`（web 版）。
+2. **smk_dk 只用 `image_thumbnail`**：`image_native` 实际不是直链，而是
+   `api.smk.dk/api/v1/download/<base64>` 下载代理端点（服务端解码后代理 iip.smk.dk 的
+   .tif.jp2 原图），实测 30s 超时；thumbnail 为 iip-thumb.smk.dk 的 1024px IIIF jpg 直链。
+3. **nasa_images 用 `links.0.href`**：实测 `links[0]` 即预览图（rel=alternate 而非 preview），
+   href 是 `~thumb/~small/~medium.jpg`，transform 统一提升为 `~orig.jpg`。
+4. **cleveland_art / bing_daily 与方案一致**：cleveland `images.web.url` 优先、
+   `print.url` 兜底；bing_daily 相对路径拼 `https://cn.bing.com` 前缀（`item.url template`），
+   下载直连无防盗链问题。
+5. **顺手修复引擎 bug**：`driver-http/curl/browser-html` 的 `fetchPage` headers 缺模板替换，
+   `'Client-ID {key}'` 字面量原样发出导致 unsplash 401；修复后 unsplash 凭据生效（5/5，3.1s）。

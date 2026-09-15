@@ -65,7 +65,10 @@ P3 已完成 **30 源全量插件化**（与 Python 版 30 个 JSON 配置一一
   lexica / midjourney×4 / pinterest / pixiv / reddit / wallhaven）：
   需 `--proxy`（如 `socks5://127.0.0.1:1080`），否则跳过（`needs-proxy`）；
 - **needs_key 源**（flickr / unsplash / wallhaven / pexels）：key 写
-  `data/settings.json`（如 `{"flickr": {"key": "..."}}`），flickr/unsplash 无 key 自动回退 alt 通道；
+  `data/settings.json` 的 `credentials.keys` 按源名存放，如
+  `{"credentials": {"keys": {"unsplash": "..."}}}`；flickr/unsplash 无 key
+  自动回退 alt 通道（unsplash 的 key 经 `Authorization: Client-ID {key}`
+  头注入，已配置并实测可用）。
 - **视频/音频源**（pixabay_video / pixabay_music / midjourney_video×2）：
   产出 mp4/mp3，媒体类型由 `ctx.media` 判定（ffmpeg 后处理属 P4 `postprocess-video`）。
 
