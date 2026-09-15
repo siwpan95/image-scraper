@@ -83,7 +83,7 @@ plugins:
   - id: sources
     module: '@scraper/core/src/sources.js'
 
-  # 首批（P0–P2）：与 Python 版已验证可用的 7 个源对齐
+  # P0–P2 首批：与 Python 版已验证可用的 7 个源对齐
   - id: source-picsum
     module: '@scraper/core/src/sources/picsum.js'
   - id: source-bing
@@ -101,7 +101,55 @@ plugins:
     module: '@scraper/core/src/sources/pixabay_illustration.js'
   - id: source-pixabay_vector
     module: '@scraper/core/src/sources/pixabay_vector.js'
-  # P3：其余 23 个源按同样方式逐行加入
+
+  # P3：其余 23 个源（browser/browser_html 源在 driver-browser(-html) 挂载前自动下线；
+  #   GFW 源需 --proxy；needs_key 源的 key 写 data/settings.json）
+  - id: source-artstation
+    module: '@scraper/core/src/sources/artstation.js'
+  - id: source-civitai
+    module: '@scraper/core/src/sources/civitai.js'
+  - id: source-deviantart
+    module: '@scraper/core/src/sources/deviantart.js'
+  - id: source-flickr
+    module: '@scraper/core/src/sources/flickr.js'
+  - id: source-google
+    module: '@scraper/core/src/sources/google.js'
+  - id: source-konachan
+    module: '@scraper/core/src/sources/konachan.js'
+  - id: source-lexica
+    module: '@scraper/core/src/sources/lexica.js'
+  - id: source-midjourney
+    module: '@scraper/core/src/sources/midjourney.js'
+  - id: source-midjourney_url
+    module: '@scraper/core/src/sources/midjourney_url.js'
+  - id: source-midjourney_video
+    module: '@scraper/core/src/sources/midjourney_video.js'
+  - id: source-midjourney_video_url
+    module: '@scraper/core/src/sources/midjourney_video_url.js'
+  - id: source-pexels
+    module: '@scraper/core/src/sources/pexels.js'
+  - id: source-photo
+    module: '@scraper/core/src/sources/photo.js'
+  - id: source-pinterest
+    module: '@scraper/core/src/sources/pinterest.js'
+  - id: source-pixabay
+    module: '@scraper/core/src/sources/pixabay.js'
+  - id: source-pixabay_music
+    module: '@scraper/core/src/sources/pixabay_music.js'
+  - id: source-pixabay_video
+    module: '@scraper/core/src/sources/pixabay_video.js'
+  - id: source-pixiv
+    module: '@scraper/core/src/sources/pixiv.js'
+  - id: source-reddit
+    module: '@scraper/core/src/sources/reddit.js'
+  - id: source-surfcg
+    module: '@scraper/core/src/sources/surfcg.js'
+  - id: source-unsplash
+    module: '@scraper/core/src/sources/unsplash.js'
+  - id: source-wallhaven
+    module: '@scraper/core/src/sources/wallhaven.js'
+  - id: source-webpage
+    module: '@scraper/core/src/sources/webpage.js'
 
   # ── L5 应用 ─────────────────────────────────────────────────
   # module 相对 pluginsDir（apps/cli/src/plugins）解析

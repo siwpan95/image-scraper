@@ -32,6 +32,20 @@ node apps/cli/src/index.js --source all --max-images 5
 首批（P0–P2）已迁移 7 个源：`bing` `duitang` `giphy` `picsum`
 `pixabay_illustration` `pixabay_vector` `safebooru`。
 
+P3 已完成 **30 源全量插件化**（与 Python 版 30 个 JSON 配置一一对应）。
+运行约束：
+
+- **browser / browser_html 源**（midjourney×4 / deviantart / google / pinterest /
+  photo / webpage）：`driver-browser(-html)` 挂载前自动下线（日志点名
+  `driver-unavailable:browser_html`），P4 实现；
+- **GFW 源**（artstation / civitai / deviantart / flickr / google / konachan /
+  lexica / midjourney×4 / pinterest / pixiv / reddit / wallhaven）：
+  需 `--proxy`（如 `socks5://127.0.0.1:1080`），否则跳过（`needs-proxy`）；
+- **needs_key 源**（flickr / unsplash / wallhaven / pexels）：key 写
+  `data/settings.json`（如 `{"flickr": {"key": "..."}}`），flickr/unsplash 无 key 自动回退 alt 通道；
+- **视频/音频源**（pixabay_video / pixabay_music / midjourney_video×2）：
+  产出 mp4/mp3，媒体类型由 `ctx.media` 判定（ffmpeg 后处理属 P4 `postprocess-video`）。
+
 ## 架构
 
 ```

@@ -1,0 +1,71 @@
+// 源插件：unsplash —— Unsplash 精选图库（API Key；无 key 回退网页抓取 alt；mode=random 走随机接口）
+// 移植自 legacy/sources/json/unsplash.json
+import Schema from 'schemastery'
+import { defineSource } from './define.js'
+
+export const Config = Schema.object({
+  query: Schema.string().default('nature').description('搜索关键词'),
+  mode: Schema.union(['search', 'random']).default('search').description('search=关键词搜索 / random=随机'),
+  key: Schema.string().default('').description('Unsplash Access Key（建议写 data/settings.json）'),
+})
+
+export default defineSource('source-unsplash', () => ({
+  def: {
+    name: 'unsplash',
+    display: 'Unsplash 精选图库',
+    driver: 'http',
+    needs_proxy: false,
+    needs_key: true,
+    media: 'image',
+    request: {
+      method: 'GET',
+      url: 'https://api.unsplash.com/search/photos',
+      headers: { Authorization: 'Client-ID {key}' },
+      params: { query: '{query}', page: '{page}', per_page: 30 },
+      pagination: { type: 'page', param: 'page', start: 1, step: 1, per_page: 30 },
+    },
+    parse: { format: 'json', list_path: 'results', stop_when_empty: true },
+    item: {
+      url: { default: [{ path: 'urls.raw' }, { path: 'urls.full' }] },
+      title: { default: [{ path: 'description' }, { path: 'alt_description' }] },
+      author: { path: 'user.name' },
+      width: { path: 'width', transform: [{ op: 'to_int' }] },
+      height: { path: 'height', transform: [{ op: 'to_int' }] },
+      meta: { id: { path: 'id' }, likes: { path: 'likes' } },
+    },
+    request_by_mode: {
+      random: {
+        request: {
+          url: 'https://api.unsplash.com/photos/random?count=30',
+          params: {},
+          pagination: { type: 'none' },
+        },
+        parse: { format: 'json', list_path: '', stop_when_empty: true },
+      },
+    },
+    alt: {
+      request: {
+        method: 'GET',
+        url: 'https://unsplash.com/s/photos/{query_encoded}',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+        pagination: { type: 'none' },
+      },
+      parse: {
+        format: 'html',
+        url_extract: {
+          patterns: ['https://images\\.unsplash\\.com/photo-[0-9a-zA-Z_-]+(?:\\?[^\\\'\\s<>()]+)?'],
+        },
+        url_transform: [{ op: 'append_query', value: '?w=2000&q=80&auto=format&fit=max' }],
+      },
+      item: {
+        url: { path: 'url' },
+        title: { const: '{query}' },
+        referer: { const: 'https://unsplash.com/' },
+      },
+    },
+  },
+  schema: Config,
+}))

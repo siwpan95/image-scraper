@@ -357,7 +357,7 @@ CLI 侧：
 | **P0 骨架** ✅ | 对齐 `@relay` 工程约定 | monorepo（`packages/*` + `apps/cli`）、移植 loader（`!!js`/行式/patch/HMR/启动审计）、`config`、`logfile` | `node apps/cli/src/index.js` 起得来；`ctx[id]` 审计通过；`--dump-config` 输出插件树 |
 | **P1 服务层** ✅ | L1 六件套 | `proxy` / `http` / `curl` / `downloader` / `storage` / `settings` | 用 **picsum** 单源打通端到端下载，落盘与 Python 版一致 |
 | **P2 能力注册表** ✅ | 消灭字符串分支 | `drivers` / `parsers` / `paginators` 注册表 + `driver-http` / `curl` / `parser-html` / `parser-json` / `paginator-*` | **test_sources 的 7 个可用源**全部跑通，下载数与 Python 版逐源比对一致 |
-| **P3 源插件化** | 30 个源成插件 | `source-*` ×30 + schema + 自动 CLI | 全部 28 个非浏览器源可跑；`_build_ctx` 概念消失 |
+| **P3 源插件化** ✅ | 30 个源成插件 | `source-*` ×30 + schema + 自动 CLI | 全部 28 个非浏览器源可跑；`_build_ctx` 概念消失 |
 | **P4 浏览器 + 视频** | 两个重点 | `driver-browser` / `driver-browser-html` / `probe` / `postprocess-video` / `media` | Midjourney 源可用；`disabled: driver-browser` 时浏览器源干净下线且**不报错、不影响其余源**；视频源出 mp4 |
 | **P5 应用层** | CLI / GUI / 调度 / 重投 / 自检 | `cli` / `scheduler` / `retry` / `verify` / `gui` | `--retry-failed` 与现状等价；`verify_proxy` 等价 |
 | **P6 门禁与交付** | 可回归 | `harness/`（不变量）+ `scripts/check.mjs` + 打包（对齐 `.iss`/`.bat` 习惯） | 不变量全绿；与 Python 版回归报告 |
