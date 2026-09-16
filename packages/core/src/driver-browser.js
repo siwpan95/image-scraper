@@ -177,7 +177,7 @@ class DriverBrowserService extends Service {
       const tag = isVideo ? 'video' : 'img'
       const respP = page.waitForResponse(
         (r) => r.url().split('?')[0] === urlBase && r.status() === 200,
-        { timeout: 25000 },
+        { timeout: 12000 },
       ).catch(() => null)
       const loadOk = await page.evaluate(([u, t]) => new Promise((res) => {
         let el
@@ -195,9 +195,15 @@ class DriverBrowserService extends Service {
         }
         el.onerror = () => fin(false)
         el.src = u
-        setTimeout(() => fin(false), 20000)
+        setTimeout(() => fin(false), 10000)
       }), [url, tag])
-      const resp = await respP
+      // 快速失败：onerror 已确认无 200 响应（403/404/挑战拒绝），不再陪等 waitForResponse 超时
+      // （实测不改这里时每个 fallback 级固定耗时 25s，MJ 双源在无登录态下各拖满 ~5 分钟）
+      if (!loadOk) {
+        log.debug?.(`  mediaFetch 加载失败(${tag}): ${url.slice(0, 80)}`)
+        return null
+      }
+      const resp = await Promise.race([respP, new Promise((r) => setTimeout(() => r(null), 5000))])
       if (resp) {
         const body = await resp.body()
         if (body && body.length > 300) return body
