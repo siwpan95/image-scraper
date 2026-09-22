@@ -13,3 +13,7 @@ __pycache__/
 build/
 dist/
 probe_capture_*.json
+
+# 运行日志与工作区（2026-09-22）
+*.log
+.workbuddy/
