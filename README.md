@@ -1,5 +1,7 @@
 # image-scraper · 多源图片爬虫
 
+> 仓库：<https://gitee.com/siwpan/image-scraper> ｜ 许可：MIT（见 [LICENSE](LICENSE)）
+
 从多个图片站统一抓取图片的命令行工具。基于 MidJourney 抓取器扩展而来，现支持 **30 个源**，统一调度、断点续传、防盗链绕过，并针对中国网络环境（GFW / 代理 / API key）做了优雅降级。
 
 ---
@@ -35,7 +37,7 @@ venv\Scripts\python.exe -m playwright install chromium
 
 `requirements.txt`：`playwright>=1.45.0`、`httpx>=0.27.0`
 
-> 本项目自带的受管 venv 已配好：`C:\Users\13122\.workbuddy\binaries\python\envs\default\Scripts\python.exe`
+> 本项目自带的受管 venv 已配好：`python`
 
 ---
 
