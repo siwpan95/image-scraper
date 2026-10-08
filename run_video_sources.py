@@ -6,10 +6,10 @@
 供「每小时自动任务」调用。依次运行两个视频源，每源带超时保护，
 运行结果写入 meta/run_video_<ts>.json 并打印简明汇总。
 
-依赖解释器: F:/Python314/python.exe
+依赖解释器: <主解释器>/python.exe（去符盘：原写死 /Python314）
   (需含 httpx / requests / bs4 / lxml / playwright；项目 .venv 缺 playwright，故用主 Python)
   调用方式:
-    F:/Python314/python.exe G:/repos/image-scraper/run_video_sources.py [--query 关键词] [--max-images 60]
+    <主解释器>/python.exe <仓根>/image-scraper/run_video_sources.py [--query 关键词] [--max-images 60]
 
 说明:
   - pixabay_video : HTTP/curl 驱动，墙内可达，无需代理，无需登录。
