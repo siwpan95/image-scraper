@@ -6,9 +6,8 @@
   - load_config / save_config / detect_proxy / effective_proxy / proxy_reachable
   - auto_fetch_proxy / CONFIG_PATH / DEFAULTS / PROXY_CANDIDATES
 
-谁在用：mj_scraper.py（auto_fetch_proxy / effective_proxy / proxy_reachable）、
-gui_scraper.py（load_config / save_config / detect_proxy）、run_video_sources.py（effective_proxy）。
-P6 入口切换完成后，本 facade 随 legacy 层一并移除。
+谁在用：mj_scraper.py / run_video_sources.py（P6 起均为薄 shim）；apps/* 经 cordis 服务
+消费（ctx.config）。gui_scraper.py 已随 P6 删除；P7 文档切换后本 facade 随 legacy 层移除。
 """
 from __future__ import annotations
 

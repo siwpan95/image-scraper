@@ -1,0 +1,150 @@
+usage: mj_scraper.py [-h]
+                     [--source {artstation,bing,civitai,deviantart,duitang,flickr,giphy,google,konachan,lexica,midjourney,midjourney_url,midjourney_video,midjourney_video_url,pexels,photo,picsum,pinterest,pixabay,pixabay_illustration,pixabay_music,pixabay_vector,pixabay_video,pixiv,reddit,safebooru,surfcg,unsplash,wallhaven,webpage,all}]
+                     [--max-images MAX_IMAGES] [--concurrency CONCURRENCY]
+                     [--proxy PROXY] [--auto-proxy] [--auto-proxy-socks]
+                     [--tab {top,trending,random,new,hot,video_top}]
+                     [--size {thumb,medium,original,original_webp}]
+                     [--scrolls SCROLLS] [--headless HEADLESS]
+                     [--content-url CONTENT_URL] [--mj-index MJ_INDEX]
+                     [--url URL] [--query QUERY] [--pages PAGES]
+                     [--unsplash-key UNSPLASH_KEY]
+                     [--unsplash-mode {search,random}]
+                     [--pexels-key PEXELS_KEY]
+                     [--civitai-sort {Newest,Most Reactions,Most Comments}]
+                     [--civitai-user CIVITAI_USER] [--nsfw] [--tags TAGS]
+                     [--booru-limit BOORU_LIMIT]
+                     [--booru-exclude BOORU_EXCLUDE]
+                     [--booru-rating BOORU_RATING]
+                     [--deviantart-sort DEVIANTART_SORT]
+                     [--flickr-key FLICKR_KEY] [--flickr-sort FLICKR_SORT]
+                     [--pinterest-pages PINTEREST_PAGES]
+                     [--picsum-query PICSUM_QUERY]
+                     [--reddit-mode {sub,search}]
+                     [--wallhaven-key WALLHAVEN_KEY] [--wallhaven-nsfw]
+                     [--wallhaven-sorting WALLHAVEN_SORTING]
+                     [--artstation-sorting ARTSTATION_SORTING]
+                     [--surfcg-sorting {0,1,2}] [--google-pages GOOGLE_PAGES]
+                     [--pixiv-order PIXIV_ORDER] [--pixiv-mode PIXIV_MODE]
+                     [--retries RETRIES] [--rate-limit RATE_LIMIT]
+                     [--speed-limit SPEED_LIMIT] [--retry-failed RETRY_FAILED]
+
+多源图片爬虫 (统一 JSON 驱动引擎)
+
+options:
+  -h, --help            show this help message and exit
+  --source {artstation,bing,civitai,deviantart,duitang,flickr,giphy,google,konachan,lexica,midjourney,midjourney_url,midjourney_video,midjourney_video_url,pexels,photo,picsum,pinterest,pixabay,pixabay_illustration,pixabay_music,pixabay_vector,pixabay_video,pixiv,reddit,safebooru,surfcg,unsplash,wallhaven,webpage,all}
+                        图片源 (默认 midjourney)
+  --max-images MAX_IMAGES
+                        每源最大下载数
+  --concurrency CONCURRENCY
+                        并发下载数
+  --proxy PROXY         代理 (如 socks5://127.0.0.1:1080)
+  --auto-proxy          自动从免费代理源(zdopen/zdaye)拉取可用代理
+  --auto-proxy-socks    自动代理时优先 SOCKS5
+  --tab {top,trending,random,new,hot,video_top}
+  --size {thumb,medium,original,original_webp}
+  --scrolls SCROLLS
+  --headless HEADLESS
+  --content-url CONTENT_URL
+                        指定 Midjourney 内容链接
+                        (https://www.midjourney.com/jobs/<uuid>?index=2)，爬取单条
+                        job
+  --mj-index MJ_INDEX   指定变体 (1-4，0=全部)，配合 --content-url
+  --url URL             指定网页 URL 爬取图片 (source=webpage)
+  --query QUERY         搜索关键词 (Bing/Unsplash/Pexels/Lexica)
+  --pages PAGES         Bing 翻页数
+  --unsplash-key UNSPLASH_KEY
+                        Unsplash Access Key
+  --unsplash-mode {search,random}
+  --pexels-key PEXELS_KEY
+                        Pexels API Key
+  --civitai-sort {Newest,Most Reactions,Most Comments}
+  --civitai-user CIVITAI_USER
+                        按用户名筛选
+  --nsfw                包含 NSFW (Civitai)
+  --tags TAGS           标签/关键词 (booru 源)
+  --booru-limit BOORU_LIMIT
+                        booru 每页条数
+  --booru-exclude BOORU_EXCLUDE
+                        标签黑名单(逗号分隔，转 -tag 过滤 NSFW/不想要内容)
+  --booru-rating BOORU_RATING
+                        Konachan 分级 (s=安全/q=可疑/e=成人)
+  --deviantart-sort DEVIANTART_SORT
+                        排序 (popular/newest/hot)
+  --flickr-key FLICKR_KEY
+                        Flickr API Key
+  --flickr-sort FLICKR_SORT
+                        排序 (relevance/interestingness-desc/date-posted-desc)
+  --pinterest-pages PINTEREST_PAGES
+                        Pinterest 翻页数
+  --picsum-query PICSUM_QUERY
+                        Picsum 作者过滤(可空, 留空=全量随机)
+  --reddit-mode {sub,search}
+                        reddit: sub=版块(r/<query>) / search=关键词搜索
+  --wallhaven-key WALLHAVEN_KEY
+                        Wallhaven API Key (NSFW 需)
+  --wallhaven-nsfw      含 NSFW (需 --wallhaven-key)
+  --wallhaven-sorting WALLHAVEN_SORTING
+                        排序 (toplist/views/favorites)
+  --artstation-sorting ARTSTATION_SORTING
+                        排序 (popular/newest/trending)
+  --surfcg-sorting {0,1,2}
+                        排序: 0=最新 1=最热 2=点赞最多
+  --google-pages GOOGLE_PAGES
+                        Google 翻页数
+  --pixiv-order PIXIV_ORDER
+                        排序 (popular_d/date_d)
+  --pixiv-mode PIXIV_MODE
+                        模式 (all/safe/r18)
+  --retries RETRIES     下载失败重试次数
+  --rate-limit RATE_LIMIT
+                        请求速率上限(请求/秒, 0=不限)
+  --speed-limit SPEED_LIMIT
+                        下载速度上限(KB/s, 0=不限)
+  --retry-failed RETRY_FAILED
+                        重投失败清单 JSON (meta/failed_<source>_<ts>.json) 中的 URL
+
+多源图片爬虫 · 统一启动器
+=========================
+所有图片源（共 23 个）现已统一为 JSON 配置（sources/json/*.json），
+由 sources.engine.JsonSource 通用引擎驱动，不再为每个源维护独立 Python 类。
+
+支持源 (23 个):
+  [墙内可达]
+  webpage     指定网页爬取 (--url "https://...")
+  midjourney  Midjourney Explore 图片 (Playwright 浏览器, tab=top)
+  midjourney_video  Midjourney Explore 视频 (Playwright 浏览器, tab=video_top)
+  bing        Bing 图片搜索 (无需 key)
+  safebooru   Safebooru 图库 (Danbooru 式, 无需 key, 支持标签黑名单)
+  artstation  ArtStation CG 社区 (无需 key)
+  picsum      Lorem Picsum 随机高清图 (无需 key)
+  duitang     堆糖中文社区 (无需 key)
+  surfcg      SurfCG 盛绘艺点 CG 社区 (无需 key, 支持关键词搜索/60w+ 作品)
+  [GFW 封锁 · 需 --proxy]
+  konachan    Konachan 图库 (booru 式, 支持分级/标签黑名单)
+  wallhaven   Wallhaven 壁纸 (NSFW 需 key)
+  google      Google 图片搜索
+  pixiv       Pixiv 插画
+  deviantart  DeviantArt (公开 RSS, 无需 key)
+  flickr      Flickr 图库 (需免费 key)
+  pinterest   Pinterest 图库
+  reddit      Reddit 图版/搜索
+  civitai     Civitai SD 社区
+  lexica      Lexica SD 搜索
+  [需免费 API key · 无 key 自动走网页兜底]
+  unsplash    Unsplash 精选图库
+  pexels      Pexels 精选图库（官方 API 免鉴权，无 key 也能抓；填 key 仅提升限流额度）
+  all         并行运行全部（按可达性自动跳过缺 key/被墙源）
+
+下载控制:
+  --retries N        下载失败重试次数 (默认 3, 指数退避)
+  --rate-limit N     请求速率上限 (请求/秒, 0=不限)
+  --speed-limit N    下载速度上限 (KB/s, 0=不限)
+
+用法：
+  python mj_scraper.py --source bing --query "ai art" --max-images 50
+  python mj_scraper.py --source safebooru --tags "landscape" --booru-exclude "blood,gore"
+  python mj_scraper.py --source konachan --booru-rating s --proxy socks5://127.0.0.1:1080
+  python mj_scraper.py --source all --max-images 20 --rate-limit 2 --speed-limit 500
+  python mj_scraper.py --source wallhaven --proxy socks5://127.0.0.1:1080 --query space
+  python mj_scraper.py --source pixiv --proxy socks5://127.0.0.1:1080 --query "初音ミク"

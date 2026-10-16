@@ -2,8 +2,8 @@
 多源图片爬虫 - 基础层（P3 起：下载器/数据结构实现迁入 services/，本模块为 facade + SourceBase 宿主）
 ========================
 - `Downloader` / `ImageTask` / `SourceStats` / `MEDIA_EXTS` 的唯一实现在
-  `services/downloader.py`（此处转发，供 engine.py / mj_scraper.py / gui_scraper.py 等
-  既有 import 面无感过渡；P6 随 legacy 层移除）。
+  `services/downloader.py`（此处转发，供 engine.py / mj_scraper.py 等既有 import 面
+  无感过渡；P7 文档切换后随 legacy 层移除。gui_scraper.py 已随 P6 删除）。
 - `SourceBase` 仍驻留本模块（P5 引擎服务化时再评估），其 run() 编排经
   `services/meta_store` 落盘元数据 —— 元数据/失败清单格式的实现只有一处。
 

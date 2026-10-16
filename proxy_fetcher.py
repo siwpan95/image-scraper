@@ -7,9 +7,8 @@
 
     python proxy_fetcher.py --test-all     # 转发到 services.proxy 的同名 CLI
 
-谁在用：config.py facade 经 services.config.auto_fetch_proxy（现直达 services.proxy）、
-gui_scraper.py（from proxy_fetcher import fetch_working_proxy）。
-P6 入口切换完成后，本 facade 随 legacy 层一并移除。
+谁在用：services.config.auto_fetch_proxy（现直达 services.proxy）。
+gui_scraper.py 已随 P6 删除；P7 文档切换后本 facade 随 legacy 层移除。
 """
 from __future__ import annotations
 
