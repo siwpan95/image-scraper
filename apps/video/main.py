@@ -26,6 +26,7 @@ if str(ROOT) not in sys.path:
 
 from apps.cli.main import run_source  # noqa: E402  共享的同一实现
 from host.tree import WANT_P5, config_path, mount_tree  # noqa: E402
+from runtime_paths import apply_frozen_defaults, base_dir  # noqa: E402
 
 log = logging.getLogger("run_video_sources")
 
@@ -102,6 +103,7 @@ async def run_one(ctx, name: str, ns, proxy: str | None, timeout: float) -> dict
 
 
 async def _amain() -> int:
+    apply_frozen_defaults()  # 冻结形态：UTF-8 输出 + 浏览器缓存对齐（源码运行无操作）
     ap = argparse.ArgumentParser(
         prog="run_video_sources.py",
         description="定时运行视频源(pixabay_video + midjourney_video)")
@@ -120,7 +122,7 @@ async def _amain() -> int:
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler(ROOT / "scraper.log", encoding="utf-8"),
+            logging.FileHandler(base_dir() / "scraper.log", encoding="utf-8"),
             logging.StreamHandler(sys.stdout),
         ],
     )
@@ -153,7 +155,7 @@ async def _amain() -> int:
         "proxy": proxy or "",
         "sources": results,
     }
-    meta_dir = ROOT / "meta"
+    meta_dir = base_dir() / "meta"
     meta_dir.mkdir(parents=True, exist_ok=True)
     rp = meta_dir / f"run_video_{ts}.json"
     rp.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")

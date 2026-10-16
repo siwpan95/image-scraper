@@ -28,10 +28,9 @@ except ImportError:  # fresh clone（未挂 .pth）→ 经仓库内 vendor 兜�
     _cordis_locate.ensure()
     from cordis import Service
 
-log = logging.getLogger("mj_scraper")  # 与 legacy SourceBase 同 logger，日志不漂移
+from runtime_paths import base_dir
 
-#: 仓库根（本文件在 services/ 下）
-ROOT = Path(__file__).resolve().parent.parent
+log = logging.getLogger("mj_scraper")  # 与 legacy SourceBase 同 logger，日志不漂移
 
 
 def save_meta(meta_dir, source_name: str, tasks: list, stats) -> Path:
@@ -89,7 +88,7 @@ class MetaStoreService(Service):
         super().__init__(ctx, "meta")
         cfg = dict(config or {})
         d = Path(cfg.get("meta_dir") or "meta")
-        self.meta_dir = d if d.is_absolute() else ROOT / d
+        self.meta_dir = d if d.is_absolute() else base_dir() / d
 
     # ---- 服务方法（转发模块级唯一实现；meta_dir 默认取 yml 值，可显式覆盖）----
     def save_meta(self, source_name: str, tasks: list, stats, meta_dir=None) -> Path:

@@ -28,12 +28,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from host.tree import WANT_P5, config_path, mount_tree  # noqa: E402
+from runtime_paths import apply_frozen_defaults, base_dir  # noqa: E402
 from services.downloader import ImageTask, SourceStats  # noqa: E402
 
 log = logging.getLogger("mj_scraper")
 
-OUTPUT_DIR = ROOT
-IMAGES_DIR = ROOT / "images"
+#: 产出根：源码运行 = 仓根；冻结（exe）运行 = exe 所在目录（见 runtime_paths）
+OUTPUT_DIR = base_dir()
+IMAGES_DIR = base_dir() / "images"
 
 #: argparse epilog —— legacy mj_scraper.py 的模块 docstring 原文（逐字节保留，金标契约）
 _LEGACY_EPILOG = """
@@ -187,6 +189,7 @@ async def retry_failed(ctx, path: Path, args) -> dict:
 
 
 async def _amain() -> int:
+    apply_frozen_defaults()  # 冻结形态：UTF-8 输出 + 浏览器缓存对齐（源码运行无操作）
     # 日志（与 legacy 逐项一致：scraper.log + stdout）
     logging.basicConfig(
         level=logging.INFO,

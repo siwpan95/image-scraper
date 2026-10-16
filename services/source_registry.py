@@ -29,6 +29,8 @@ except ImportError:  # fresh clone（未挂 .pth）→ 经仓库内 vendor 兜�
     _cordis_locate.ensure()
     from cordis import Service
 
+from runtime_paths import base_dir
+
 log = logging.getLogger("mj_scraper")  # 与 sources.base.log 同名
 
 #: 仓库根（本文件在 services/ 下）
@@ -174,8 +176,9 @@ def build_source(name: str, args, keys: Optional[dict] = None):
 
 
 def _images_dir() -> Path:
-    # images/ 输出目录：仓库根 / images
-    return ROOT / "images"
+    # images/ 输出目录：源码 = 仓根 / images；冻结（exe）= exe 旁 / images
+    # （JSON 资产仍走 ROOT=_MEIPASS 的 datas；可写产出必须锚 exe 旁 —— 见 runtime_paths）
+    return base_dir() / "images"
 
 
 def reload(json_dir=None):

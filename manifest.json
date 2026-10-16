@@ -1,6 +1,6 @@
 {
   "name": "image-scraper",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "entry": "apps/cli/main.py",
   "interface": ["fetch", "extract"],
   "description": "多源图片爬虫（30 源），cordis 配置树驱动，含代理获取/校验",

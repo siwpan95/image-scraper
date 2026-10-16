@@ -4,9 +4,9 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [Unreleased] — cordis 内核重构（2026-10-16）
+## [2.0.0] - 2026-10-16
 
-抓取内核重构：能力拆为 cordis 服务，装配清单 `cordis.yml`；CLI 契约（40+ 参数、输出格式）与旧版逐字节一致。
+抓取内核重构：能力拆为 cordis 服务，装配清单 `cordis.yml`；CLI 契约（40+ 参数、输出格式）与旧版逐字节一致。**破坏性变更：tkinter GUI 已移除**（调度能力由 CLI 完整覆盖）。
 
 ### Added
 
@@ -14,6 +14,7 @@
 - 浏览器服务双模式：默认 launch（行为与旧版一致）；新增 **CDP 模式**接管本地 Chrome（`cordis.yml` 的 `browser.cdp`）—— 登录态复用 / 反爬友好。
 - 分阶段 headless 验收：`scripts/mount_check.py`、`scripts/p2_check.py` ~ `scripts/p7_check.py`（含文件名规则 12800+ 语料 diff、四路径分类矩阵、P0 黄金轨迹重放）。
 - 环境修复：midjourney 浏览器源恢复可用（chromium-1248 与 playwright 1.64 对齐；此前版本错位必败）。
+- 发行版打包：PyInstaller 单文件 exe（随包 cordis.yml / 30 源 JSON / Playwright 驱动）；`runtime_paths.py` 提供冻结（exe 旁）/ 源码（仓根）双形态产出根，产出跨运行留存。
 
 ### Changed
 

@@ -15,7 +15,6 @@ import json
 import os
 import socket
 import sys
-from pathlib import Path
 
 try:
     from cordis import Service
@@ -25,10 +24,11 @@ except ImportError:  # fresh clone（未挂 .pth）→ 经仓库内 vendor 兜�
     _cordis_locate.ensure()
     from cordis import Service
 
-#: 仓库根（本文件在 services/ 下）
-ROOT = Path(__file__).resolve().parent.parent
+from runtime_paths import base_dir
 
-CONFIG_PATH = ROOT / "config.json"
+#: config.json 落点：源码运行 = 仓根；冻结（exe）运行 = exe 旁（跨运行留存）
+#  （runtime_paths 判定；非冻结时值与旧实现完全一致）
+CONFIG_PATH = base_dir() / "config.json"
 
 DEFAULTS: dict = {
     "proxy": "",
