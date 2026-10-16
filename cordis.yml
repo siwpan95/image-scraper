@@ -53,6 +53,9 @@
       url: "http://127.0.0.1:9222"
       stealth: false
 
+- name: services.engine
+  id: engine
+
 - name: services.source_registry
   id: sources
   config:

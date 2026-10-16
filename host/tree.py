@@ -41,6 +41,8 @@ WANT_P2 = ("config", "proxy", "sources")
 WANT_P3 = ("config", "proxy", "downloader", "meta", "sources")
 #: P4 就绪所需的服务集（+ browser；launch/CDP 双模式）
 WANT_P4 = ("config", "proxy", "downloader", "meta", "browser", "sources")
+#: P5 就绪所需的服务集（+ engine；统一引擎服务化）
+WANT_P5 = ("config", "proxy", "downloader", "meta", "browser", "engine", "sources")
 
 ALLOWED_NAME_PREFIXES = ("services.",)
 ALLOWED_NAME_EXACT = ("@cordisjs/plugin-group",)
