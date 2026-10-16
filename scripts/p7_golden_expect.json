@@ -1,0 +1,71 @@
+{
+  "_note": "P7 总验收基准 —— P0 黄金轨迹（2026-10-16，golden/README.md，tag pre-cordis-baseline @ ce1f3d3）。01-06 单源命令；07/08 形态线。重放命令语法与 P0 完全一致（mj_scraper.py = 兼容 shim → apps/cli/main.py）。",
+  "commands": [
+    {
+      "id": "01",
+      "desc": "bing 普通搜索",
+      "source": "bing",
+      "args": ["--source", "bing", "--query", "cyberpunk city", "--max-images", "3"],
+      "p0": {"fetched": 3, "downloaded": 1, "skipped": 2, "errors": 0, "elapsed": 2.4, "exit": 0},
+      "expect_fetched": 3
+    },
+    {
+      "id": "02",
+      "desc": "bing 限速路径",
+      "source": "bing",
+      "args": ["--source", "bing", "--max-images", "3", "--rate-limit", "2", "--speed-limit", "500"],
+      "p0": {"fetched": 3, "downloaded": 0, "skipped": 3, "errors": 0, "elapsed": 1.2, "exit": 0},
+      "expect_fetched": 3
+    },
+    {
+      "id": "03",
+      "desc": "safebooru 标签",
+      "source": "safebooru",
+      "args": ["--source", "safebooru", "--tags", "landscape", "--max-images", "3"],
+      "p0": {"fetched": 3, "downloaded": 2, "skipped": 1, "errors": 0, "elapsed": 5.5, "exit": 0},
+      "expect_fetched": 3
+    },
+    {
+      "id": "04",
+      "desc": "picsum",
+      "source": "picsum",
+      "args": ["--source", "picsum", "--max-images", "3"],
+      "p0": {"fetched": 3, "downloaded": 0, "skipped": 3, "errors": 0, "elapsed": 1.8, "exit": 0},
+      "expect_fetched": 3
+    },
+    {
+      "id": "05",
+      "desc": "duitang",
+      "source": "duitang",
+      "args": ["--source", "duitang", "--max-images", "3"],
+      "p0": {"fetched": 3, "downloaded": 3, "skipped": 0, "errors": 0, "elapsed": 1.3, "exit": 0},
+      "expect_fetched": 3
+    },
+    {
+      "id": "06",
+      "desc": "artstation（GFW 无代理优雅降级）",
+      "source": "artstation",
+      "args": ["--source", "artstation", "--max-images", "3"],
+      "p0": {"fetched": 0, "downloaded": 0, "skipped": 0, "errors": 0, "elapsed": 10.2, "exit": 0},
+      "expect_fetched": 0
+    },
+    {
+      "id": "07",
+      "desc": "全源总览（30 源；P0 附录：浏览器源按修复后成功形态）",
+      "args": ["--source", "all", "--max-images", "1"],
+      "p0": {"exit": 0, "summary_lines": 24,
+             "note": "P0 时 5 个浏览器源 + midjourney_video 因环境（chromium 版本错位）无总览行；P1 修复环境后 P6 实测 30/30 总览行，P7 按此核对"},
+      "require_sources": 30,
+      "midjourney_min_fetched": 1,
+      "require_url_zero": ["webpage", "photo", "midjourney_url", "midjourney_video_url"],
+      "gfw_expect_zero": ["artstation", "wallhaven", "reddit", "konachan", "lexica", "civitai"]
+    },
+    {
+      "id": "08",
+      "desc": "失败清单重投",
+      "args": ["--retry-failed", "meta/failed_safebooru_20260708_022503.json"],
+      "p0": {"total": 1, "success": 1, "failed": 0, "exit": 0},
+      "expect_retry": {"total": 1, "success": 1, "failed": 0}
+    }
+  ]
+}

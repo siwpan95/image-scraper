@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
-离线自测：校验 JSON 配置合法性 + 引擎解析/字段映射逻辑（无需联网）。
+离线自测：JSON 配置合法性 + 引擎解析/字段映射逻辑 + cordis 服务级挂载验收（无需联网）。
+
+P7 升级：末尾追加「服务级验收」——按 cordis.yml 挂载内核（config / proxy / downloader /
+meta / browser / engine / sources 七服务），断言服务就绪、身份一致（服务与 facade 为同一
+实现）、dispose 回滚。
+
 运行： python selftest.py
 """
 from __future__ import annotations
@@ -269,6 +274,45 @@ async def test_full_flow():
     print(f"  picsum full flow ......... OK ({len(tasks)} tasks)")
 
 
+def test_cordis_services():
+    """服务级验收（P7 升级）：按 cordis.yml 挂载内核，断言
+    ① 七服务就绪 ② 身份一致（服务 == facade/模块级唯一实现）③ dispose 回滚。"""
+    from host.tree import WANT_P5, config_path, mount_tree
+
+    async def _run():
+        ctx = await mount_tree(config_path("cordis.yml"), want=WANT_P5)
+
+        # ① 服务集就绪
+        missing = [n for n in WANT_P5 if getattr(ctx, n, None) is None]
+        assert not missing, f"服务不就绪: {missing}"
+
+        # ② 身份一致：服务消费的就是 facade/模块级同一实现
+        import services.engine as svc_engine
+        import services.downloader as svc_dl
+        import config as legacy_config
+        import sources.registry as legacy_registry
+
+        assert ctx.sources.names == list(legacy_registry.ALL_SOURCES)
+        assert list(ctx.config.proxy_candidates) == list(legacy_config.PROXY_CANDIDATES)
+        # Traceable 代理对可调用属性（类）包了 self 注入，身份比对取 __wrapped__
+        engine_cls = getattr(ctx.engine.source_class, "__wrapped__", ctx.engine.source_class)
+        assert engine_cls is svc_engine.JsonSource, engine_cls
+        d = ctx.downloader.create(ROOT / "images")
+        assert isinstance(d, svc_dl.Downloader)
+
+        # ③ dispose 回滚：全部 entry 移除后服务不可达
+        loader = ctx.loader
+        for options in list(loader.root.data):
+            loader.root.remove(options["id"])
+        for _ in range(20):
+            await asyncio.sleep(0)
+        gone = [n for n in WANT_P5 if getattr(ctx, n, None) is not None]
+        assert not gone, f"dispose 后服务仍可达: {gone}"
+
+    asyncio.run(_run())
+    print("  cordis 服务级验收 ......... OK (7 服务就绪 / 身份一致 / dispose 回滚)")
+
+
 def main():
     print(f"已加载源: {len(ALL_SOURCES)} -> {ALL_SOURCES}\n")
     assert len(ALL_SOURCES) == 30, f"期望 30 个源，实际 {len(ALL_SOURCES)}"
@@ -284,6 +328,7 @@ def main():
     test_extract_units()
     asyncio.run(test_skip_empty())
     asyncio.run(test_full_flow())
+    test_cordis_services()
     print("\n全部自测通过 [OK]")
 
 
