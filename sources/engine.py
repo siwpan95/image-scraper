@@ -78,6 +78,7 @@ from typing import Optional
 import httpx
 
 from .base import SourceBase, ImageTask, SourceStats, Downloader, log
+from services.browser import open_session
 
 
 # ───────────────────────────── 工具函数 ─────────────────────────────
@@ -740,27 +741,13 @@ class JsonSource(SourceBase):
                 return self.stats
 
         async with async_playwright() as pw:
-            browser = await pw.chromium.launch(
-                headless=headless,
-                args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-gpu"],
+            # 浏览器会话统一经 services.browser（launch / CDP 双模式，P4）
+            session = await open_session(
+                pw, proxy=self.proxy, headless=headless,
+                # UA 为本路径历史原值（无 KHTML 段，与 _run_browser_html 有差异，勿统一）
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36",
             )
-            ctx_args: dict = {
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36",
-                "viewport": {"width": 1920, "height": 1080},
-                "locale": "en-US",
-            }
-            if self.proxy:
-                ctx_args["proxy"] = {"server": self.proxy}
-            context = await browser.new_context(**ctx_args)
-            page = await context.new_page()
-
-            # 注入 stealth 脚本（降低 Cloudflare 检测率）
-            await page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', { get: () => false });
-                Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
-                Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-                window.chrome = { runtime: {} };
-            """)
+            browser, context, page = session.browser, session.context, session.page
 
             jobs: dict = {}
             api_hits = [0]  # 记录 API 响应命中次数
@@ -883,7 +870,7 @@ class JsonSource(SourceBase):
             else:
                 log.warning(f"  源 [{self.name}] 无任务")
 
-            await browser.close()
+            await session.aclose()
 
         self.stats.end_time = time.time()
         self._summary()
@@ -948,30 +935,12 @@ class JsonSource(SourceBase):
         seen: set = set()
 
         async with async_playwright() as pw:
-            browser = await pw.chromium.launch(
+            # 浏览器会话统一经 services.browser（launch / CDP 双模式，P4）
+            session = await open_session(
+                pw, proxy=self.proxy,
                 headless=bool(self.ctx.get("headless", True)),
-                args=["--disable-blink-features=AutomationControlled",
-                      "--no-sandbox", "--disable-gpu"],
             )
-            ctx_args: dict = {
-                "user_agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/125.0.0.0 Safari/537.36"
-                ),
-                "viewport": {"width": 1920, "height": 1080},
-                "locale": "en-US",
-            }
-            if self.proxy:
-                ctx_args["proxy"] = {"server": self.proxy}
-            context = await browser.new_context(**ctx_args)
-            page = await context.new_page()
-            await page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', { get: () => false });
-                Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
-                Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-                window.chrome = { runtime: {} };
-            """)
+            browser, context, page = session.browser, session.context, session.page
 
             for pidx, pv in enumerate(pages):
                 if len(tasks) >= self.max_images:
@@ -1064,7 +1033,7 @@ class JsonSource(SourceBase):
                 if delay and pidx < len(pages) - 1:
                     await asyncio.sleep(float(delay))
 
-            await browser.close()
+            await session.aclose()
 
         tasks = tasks[:self.max_images]
         self.stats.fetched = len(tasks)

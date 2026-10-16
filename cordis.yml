@@ -41,6 +41,18 @@
   config:
     meta_dir: meta
 
+- name: services.browser
+  id: browser
+  config:
+    # launch 模式（默认，行为与 legacy 一致）
+    headless: true
+    stealth: true
+    # CDP 模式：接管本地已启动的 Chrome（enabled=true 时生效；启动方式见 services/browser.py 头注）
+    cdp:
+      enabled: false
+      url: "http://127.0.0.1:9222"
+      stealth: false
+
 - name: services.source_registry
   id: sources
   config:
