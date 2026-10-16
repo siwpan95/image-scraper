@@ -1,0 +1,272 @@
+{
+ "artstation": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "bing": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "civitai": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "deviantart": {
+  "driver": "browser_html",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "duitang": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "flickr": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "giphy": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "google": {
+  "driver": "browser_html",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "konachan": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "lexica": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "midjourney": {
+  "driver": "browser",
+  "needs_browser": true,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "midjourney_url": {
+  "driver": "browser",
+  "needs_browser": true,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": true,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "midjourney_video": {
+  "driver": "browser",
+  "needs_browser": true,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "midjourney_video_url": {
+  "driver": "browser",
+  "needs_browser": true,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": true,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "pexels": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "photo": {
+  "driver": "browser_html",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "picsum": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "pinterest": {
+  "driver": "browser_html",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "pixabay": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": "curl",
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "pixabay_illustration": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": "curl",
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "pixabay_music": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": "curl",
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "pixabay_vector": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": "curl",
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "pixabay_video": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": "curl",
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ },
+ "pixiv": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "reddit": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "safebooru": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "surfcg": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "unsplash": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": true
+ },
+ "wallhaven": {
+  "driver": "http",
+  "needs_browser": false,
+  "needs_proxy": true,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": false,
+  "alt_wants_browser_html": false
+ },
+ "webpage": {
+  "driver": "browser_html",
+  "needs_browser": false,
+  "needs_proxy": false,
+  "fetch": null,
+  "require_content_url": false,
+  "is_browser_html": true,
+  "alt_wants_browser_html": false
+ }
+}

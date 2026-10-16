@@ -1,0 +1,77 @@
+# Cordis vendor lock —— 精确提交钉死 + 溯源校验
+#
+# 本仓获取方式：**传递性 vendor** —— 逐字节复制自 G:/repos/3dworld/vendor/cordis
+# （该仓以 GitHub 归档 zip 的 comment 字段离线钉死 commit a3d0c17；见其 VENDOR.md）。
+# 本文件是 vendor 转正的"提交契约"：Cordis 接线依赖的公开 API 以本 commit 为准；
+# [hashes] 段为复制后的逐文件 sha256 —— 与本仓副本一一对应，可完全离线复核。
+
+[source]
+repo          = "https://github.com/geohotstan/cordis-py"
+branch        = "main"
+import_name   = "cordis"
+port_of       = "cordiverse/cordis v4 (TypeScript/JS 原版)"
+license       = "MIT"
+
+[pin]
+commit          = "a3d0c171571c6bbb465d04c06eab2de53d270814"
+commit_short    = "a3d0c17"
+commit_message  = "test(paper): render the Cordis paper as an executable test suite"
+commit_date     = "2026-08-14"
+package_version = "4.0.0"
+download_date_3dworld = "2026-10-09"
+vendored_to_here      = "2026-10-16"
+provenance            = "transitive copy from G:/repos/3dworld/vendor/cordis"
+provenance_note       = "复制后与 3dworld 副本 diff -rq 逐字节一致（唯一差异为其 __pycache__）"
+
+[hashes]
+# 生成：cd vendor/cordis && find src tests -type f | sort | xargs sha256sum
+# 复核：把下列 49 行存为 hashes.txt（在 vendor/cordis 目录执行）：sha256sum -c hashes.txt
+15341316454ddec09ef9776e8012bc435a2fc37911a94e13f2f95a51f983cd60 *src/cordis/__init__.py
+3efa577a0e230d32398368e51b2726d0ce70261af6e1956ddfa5e1e642edf4a3 *src/cordis/context.py
+a1719eaf616492b139f9fc607bfaea895bb8ede7deac59b8fb637ff04429c782 *src/cordis/create.py
+595d5428e9d4f30a326a8edd4d5f049d08b74bfdebb57a97710899f6d1909750 *src/cordis/events.py
+b004778836bc913c50f1376b26287735e46edf34247c918c1e3b9192621361b6 *src/cordis/fiber.py
+f24772582092ac035192082ee6547f4c1e700a2529b786237ff00dc40ed1cc8e *src/cordis/hmr.py
+265c22af4b699812c350445f94935309a9fe2365fee0a412ee470e10261d2fcf *src/cordis/include.py
+46b0142f43fe7b9ba6e0a59f3b944935f81ab85a3f8220a46a2eacb6a07ac12c *src/cordis/loader.py
+4670a3df04ecc45eb8e29b46fa0d6960fe3c0a440c11467d2437521483c8bc61 *src/cordis/logger.py
+ae2863ea4ded9f9ef54578457b337a871189952cfe1479cfe0a0e51684a693bd *src/cordis/logger_console.py
+7b176275f29098b133ba6fddba46bf7ec42cbf47b8e7efcd49f43c0f833777c0 *src/cordis/reflect.py
+8164042e8c9e2be356574b108ea28b94092e06bb3a5d2a085ca1aacecd147e9e *src/cordis/registry.py
+302533bb4763da6f9c1c699e4b234d9fa53b755b13ef6c5350041093af122026 *src/cordis/service.py
+6676b4d6ea25590a152fab826c46ade1173f9ff7df7dcc20c85de02a8eebfbb9 *src/cordis/timer.py
+ba72b27e2731bfd2ba8a838c87dcc6136231160dcaf03e94c6bd25262e128693 *src/cordis/traceable.py
+b67b75085df28b8d5a2ab920f9280d731670745459483aa88b50b59c5d6ff9dc *src/cordis/utils.py
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 *tests/__init__.py
+f3cf9af5498ef7b21e3ab4b3aee7336e044f98a5313ada8b41a015bfdbf983ab *tests/conftest.py
+85f5f044f39861e41f8bb67b305b3474b35f25ac9ed07b9a25aa990d4c5298f4 *tests/fake_clock.py
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 *tests/fixtures/__init__.py
+d06b0dac83bf975c8744ebf0ca21e62ec62599d47d96b37edbdcbeed1cbf773e *tests/fixtures/base.yml
+c19909cce9c2ec74e60f31a822488d30b8c1735645087e73abb5ad104bb74c30 *tests/fixtures/extra_plugin.py
+ce13dd52235a0cba6b5f4877982a2aa93807c2dd61775d1ea22b1cc7617a9edb *tests/fixtures/test_plugin.py
+0bab4a81622cf1f7d7c3ce3721c42fde1957aaded1e825cfb1c4d6c971230989 *tests/fixtures/timer_plugin.py
+a5100dab7c97fee05679b699d0f47ddf3e852cf7d532a46902dc6bb2b250e6e6 *tests/loader_utils.py
+230f789dff1b7c29668154c53b94a5ffbdbf3b115e8dadc8a4e3d62471b7264d *tests/paper/__init__.py
+87dc7d00479bc3703e1428f56c0a30e7d6ea8f0b852e262ca875d8fddfa526b9 *tests/paper/reference.py
+448f0f57f1e69f884fea8dea6f20cb188217142a7c8c6857d3e4ca50dc9e466b *tests/paper/test_calculus.py
+ff8502f3ec80e353fe65185b38d956c20a036be85b3feafdc16cc8272f6b1f67 *tests/paper/test_metatheory.py
+5627a0014f40608320850ed7f1321aa877de0642a65562a60082e656d1bedbc9 *tests/paper/test_theorems.py
+afb46e93acc0fef966c7b0c1dec0ad310dda354a94d7a6739d84f62128ddf74c *tests/test_associate.py
+816899498e88c817d8d7576f34412e19054ad35f59c0d834af655d6d41ea249e *tests/test_create.py
+053dce1580fb56fced936777d4b79ead9053392e06856faab6b3abaa31a9fbae *tests/test_dispose.py
+3319b3f65457cd87b6b6721cfc849e023ece974b1049158e03971555e907e212 *tests/test_events.py
+cc2a9876d10f9ca428e1d93a9b530bd591ec7dec852f1c27a29264b2aa0d4e44 *tests/test_fiber.py
+58c074bcc7314747e53dbe65eee05796260c418b7704b61c4a0cb9c2a7c12388 *tests/test_group.py
+aef12b8db47d1863363f93c6c42f763782f0768437980700a3e2a851b1dca658 *tests/test_hmr.py
+a8a2b62f6fcd751380c272a3a3834d1c96f44008cd4f196d16d58cf0446d45cc *tests/test_include.py
+1af66379415ce16afe319982e80643073d07ba6a7a4f67175f0b70e44f27cd94 *tests/test_invoke.py
+24d1bb6c7d6c45cc4e4af06f515b3e8905c66e813f345ceca452a47c1926905e *tests/test_isolate.py
+22b2167b81f580b8909b4c71e14699bd441d9149a876c4ef7924b74a5e62e596 *tests/test_isolate_loader.py
+09b804608438d2005f8561338e54202b8f26350b669094496cea99beb1aaedfd *tests/test_loader.py
+0d588dbc5480b909d93053e71421482ab4781f17805386bc34db3b30449be84f *tests/test_logger.py
+03b6d717e50e1574a2fc9f1afb6278f34a7c168fb471beb9c99ae6a227691a60 *tests/test_logger_console.py
+31fc7bf5624888652d166d77736c9be3b9aeba4320caf60718f5da11aaff1464 *tests/test_plugin.py
+5f21aee76d475c4341ec782946924ddd999b1d069126e6c00edcb7970119ea0c *tests/test_reflect.py
+1cefe401daf557ee298288246123aad101f9df613a85ec58e51c88b184633679 *tests/test_scratch.py
+24e656d0b183714a85a6125e4f58c63de3cc1339188dd3b08ddc528a4f730f0e *tests/test_service.py
+d40144096710f1ec2352efec9ddecc138fa5dec95970f2498a1b2a2c593c5771 *tests/test_timer.py

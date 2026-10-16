@@ -1,0 +1,63 @@
+# image-scraper × cordis 配置树（P1 最小树：config + sources）
+#
+# 声明「本次挂哪些服务、各带什么配置」——声明即挂载，cordis 按 inject 依赖图自动排序。
+# entry 的 name 会被 import 为模块并取其 default（白名单见 host/tree.py，仅允许 services.*）。
+# 本文件是 apps/*（P6 起）与 scripts/mount_check.py 共用的唯一装配清单（"怎么挂的 = 怎么验的"）。
+#
+# 行为参数逐步集中于此：P1 为声明与验收期（消费点迁移见各服务 docstring），
+# 改值不动 Python。
+
+- name: services.config
+  id: config
+  config:
+    # 本地代理候选端口（Clash / v2rayN / SS / 系统代理），探测顺序即列表顺序
+    proxy_candidates:
+      - "socks5://127.0.0.1:1080"
+      - "http://127.0.0.1:7890"
+      - "http://127.0.0.1:8080"
+      - "http://127.0.0.1:8888"
+      - "socks5://127.0.0.1:10808"
+      - "http://127.0.0.1:10809"
+      - "socks5://127.0.0.1:7891"
+
+- name: services.proxy
+  id: proxy
+  config:
+    # 免费代理拉取（zdaye 公开页页数 / 优先 SOCKS5）
+    free_pages: 3
+    prefer_socks: false
+
+- name: services.downloader
+  id: downloader
+  config:
+    # 下载器默认（逐参可被调用方覆盖）：并发 / 重试 / 速率 / 限速
+    concurrency: 5
+    retries: 3
+    rate_limit: 0.0
+    speed_limit: 0.0
+
+- name: services.meta_store
+  id: meta
+  config:
+    meta_dir: meta
+
+- name: services.browser
+  id: browser
+  config:
+    # launch 模式（默认，行为与 legacy 一致）
+    headless: true
+    stealth: true
+    # CDP 模式：接管本地已启动的 Chrome（enabled=true 时生效；启动方式见 services/browser.py 头注）
+    cdp:
+      enabled: false
+      url: "http://127.0.0.1:9222"
+      stealth: false
+
+- name: services.engine
+  id: engine
+
+- name: services.source_registry
+  id: sources
+  config:
+    json_dir: sources/json
+    images_dir: images

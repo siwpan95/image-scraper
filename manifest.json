@@ -1,8 +1,8 @@
 {
   "name": "image-scraper",
   "version": "1.0.0",
-  "entry": "gui_scraper.py",
+  "entry": "apps/cli/main.py",
   "interface": ["fetch", "extract"],
-  "description": "多源图片爬虫（A 模式源族 29 源），JSON 配置驱动，含代理获取/校验",
+  "description": "多源图片爬虫（30 源），cordis 配置树驱动，含代理获取/校验",
   "python": "auto"
 }

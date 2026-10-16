@@ -10,6 +10,8 @@
 
 - **30 个图片源**：Midjourney、Bing、Safebooru、Konachan、Wallhaven、ArtStation、Google、Pixiv、DeviantArt、Flickr、Pinterest、Unsplash、Pexels、Civitai、Lexica、Pixabay、**Giphy 动图**（完整清单见 `sources/json/`）
 - **统一调度**：`--source all` 并行跑全部源，按可达性自动跳过缺 key / 被墙源
+- **配置树内核**：cordis 配置树（`cordis.yml`）声明式装配服务（P7 起），改配置不动 Python
+- **浏览器双模式**：默认自管 Chromium（launch）；可切换 CDP 模式接管本地 Chrome —— 复用登录态 / 真实指纹，反爬更友好（见下文「浏览器 CDP 模式」）
 - **断点续传**：已下载的图片自动跳过
 - **防盗链绕过**：自动发送 `Referer`；Bing 等源从原图 URL 提取
 - **GFW 友好**：被墙源无代理时直接跳过（不傻等 30s 超时）
@@ -35,9 +37,9 @@ venv\Scripts\python.exe -m pip install -r requirements.txt
 venv\Scripts\python.exe -m playwright install chromium
 ```
 
-`requirements.txt`：`playwright>=1.45.0`、`httpx>=0.27.0`
+`requirements.txt`：`httpx`、`playwright`、`pyyaml`、`watchdog`（后两者为 cordis 内核依赖；vendored cordis 已随仓库携带，无需单独安装）
 
-> 本项目自带的受管 venv 已配好：`python`
+> 本仓库受管 venv：`.venv/Scripts/python.exe`。pip 直连若被重置，追加 `-i https://mirrors.aliyun.com/pypi/simple/` 走镜像。
 
 ---
 
@@ -47,6 +49,8 @@ venv\Scripts\python.exe -m playwright install chromium
 PY=venv/Scripts/python.exe        # 或受管 venv 的 python
 $PY mj_scraper.py --source <源名> [选项]
 ```
+
+> `mj_scraper.py` 为兼容 shim（等价于 `apps/cli/main.py`），历史命令行零改动。
 
 ### 常用示例
 
@@ -212,25 +216,39 @@ Edge 不在默认路径时用环境变量 `PROBE_EDGE=<msedge.exe>` 指定。默
 
 ---
 
-## GUI 版（tkinter）
+## GUI 版（已移除）
 
-除命令行外，本项目附带图形界面 `gui_scraper.py`，直接复用 `mj_scraper.py` 的调度逻辑与 `sources.base` 的下载/元数据基础设施。
+内核重构（cordis）后 `gui_scraper.py`（tkinter 界面，681 行）已移除 —— 调度能力由 CLI 完整提供（`--source all` 实时总进度条 + 结果总览表）。如需图形界面，可基于 `apps/cli/main.py` 的 `run_source` 二次开发。
+
+---
+
+## 内核（cordis 配置树）
+
+抓取能力（配置 / 代理 / 源注册 / 下载 / 元数据 / 浏览器 / 引擎）拆为 `services/` 下的 cordis 服务，装配清单是 `cordis.yml` —— 增删服务、改行为参数（并发、重试、代理候选……）**改 yml 即可**。应用入口 `apps/cli/main.py` 与验收脚本走同一挂载路径（`host/tree.py`；entry name 有白名单，防「改 yml = 执行代码」）。
 
 ```bash
-$PY gui_scraper.py
+$PY selftest.py                     # 离线单测 + 服务级挂载验收（七服务就绪 / 身份一致 / 回滚）
+$PY scripts/mount_check.py          # 配置传递断言 + dispose 回滚断言
+$PY scripts/p7_check.py             # P7 总验收（对 P0 黄金轨迹；--replay 完整重放）
 ```
 
-功能：
+### 浏览器 CDP 模式（接管本地 Chrome）
 
-- **源选择**：下拉框选单个源或 `all`（顺序运行全部可达源）。
-- **通用设置**：每源最大数、并发、代理、重试、请求/速度限速。
-- **源专属设置**：选源后自动显示该源对应参数（如 Bing 翻页数、Konachan 分级、各 API Key 等）。
-- **实时日志**：复用 `sources.base` 的 `log`，流式显示抓取/下载过程。
-- **结果汇总表**：每个源的获取/下载/跳过/失败/耗时。
-- **失败清单重投**：按钮选择 `meta/failed_*.json` 一键重投（不再重新 fetch）。
-- **打开图片目录**：直接打开 `images/` 输出文件夹。
+默认 launch 模式由 Playwright 自管 Chromium。需要**复用登录态 / 真实浏览器指纹**（反爬更友好）时，切换 CDP 模式接管本地 Chrome：
 
-> GUI 在独立线程中跑 asyncio 事件循环，日志通过线程安全队列回传主线程，不卡界面。`all` 模式为顺序执行（便于「停止」即时生效）。
+```bash
+# 1. 启动一个带调试端口的专用 Chrome（勿用日常默认 profile！）
+"C:\Program Files\Google\Chrome\Application\chrome.exe" ^
+  --remote-debugging-port=9222 ^
+  --user-data-dir="C:\chrome_profiles\image_scraper"
+  # 如需代理：追加 --proxy-server="socks5://127.0.0.1:1080"
+
+# 2. 验证：浏览器打开 http://127.0.0.1:9222/json/version 能看到 webSocketDebuggerUrl
+
+# 3. 打开 cordis.yml 中的开关（browser.cdp.enabled: true，url 默认 9222），完工
+```
+
+> 说明：CDP 下复用 Chrome 的默认上下文（登录态 / 真实 UA，不再注入伪装脚本）；**代理必须写在 Chrome 启动参数**（context 级代理在 CDP 下不生效）；清理时只关本次打开的页面，**不会关掉你的 Chrome**。
 
 ---
 
@@ -238,42 +256,42 @@ $PY gui_scraper.py
 
 ```
 image-scraper/
-├── mj_scraper.py          # 统一启动器（调度全部源）
-├── mj_discover.py         # Midjourney API 发现工具
-├── verify_proxy.py        # GFW 源代理一键验证脚本
-├── requirements.txt
+├── mj_scraper.py          # 兼容 shim → apps/cli/main.py（历史命令行零改动）
+├── apps/
+│   ├── cli/main.py        # 统一 CLI（argparse 契约与旧版逐字节一致）
+│   └── video/main.py      # 视频源入口（与 CLI 共享同一 run_source）
+├── cordis.yml             # 服务装配清单（配置树：声明即挂载）
+├── host/tree.py           # 配置树引导（唯一挂载路径，entry 白名单）
+├── services/              # cordis 服务（内核）
+│   ├── config.py          #   持久配置 + 代理探测
+│   ├── proxy.py           #   免费代理拉取（zdaye）
+│   ├── source_registry.py #   源注册 / _build_ctx 翻译层
+│   ├── downloader.py      #   异步下载器（文件名规则 / 跳过 / 格式回退）
+│   ├── meta_store.py      #   运行元数据 / 失败清单落盘
+│   ├── browser.py         #   浏览器会话（launch / CDP 双模式）
+│   └── engine.py          #   JsonSource 统一引擎（http / curl / browser 多路径）
 ├── sources/
-│   ├── base.py            # SourceBase / ImageTask / Downloader（核心基础设施）
-│   ├── engine.py          # JsonSource 统一引擎（JSON 配置驱动；支持 fetch:curl 绕过 CF）
-│   ├── registry.py        # 扫描 sources/json/*.json 自动注册 ALL_SOURCES / build_source
-│   ├── json/              # 各源配置（新增源 = 加一份 JSON，pixabay.json 即其一）
-│   ├── midjourney.py      # Playwright 浏览器源
-│   ├── bing.py            # Bing HTML 解析
-│   ├── booru.py           # Safebooru + Konachan（共用 BooruSource）
-│   ├── wallhaven.py
-│   ├── artstation.py
-│   ├── google.py
-│   ├── pixiv.py
-│   ├── deviantart.py      # 公开 RSS
-│   ├── flickr.py          # 需 key
-│   ├── pinterest.py       # HTML 解析
-│   ├── unsplash.py        # 需 key
-│   ├── pexels.py          # 需 key
-│   ├── civitai.py
-│   └── lexica.py
+│   ├── json/              # 各源配置（30 源；新增源 = 加一份 JSON）
+│   ├── base.py            # facade → services（兼容层）
+│   ├── engine.py          # facade → services.engine
+│   └── registry.py        # facade → services.source_registry
+├── vendor/cordis/         # cordis-py v4.0.0（vendored；VENDOR.md + cordis.lock 记账）
+├── scripts/               # headless 验收（mount_check / p2 ~ p7_check）
 ├── images/<源名>/         # 下载图片落盘
 └── meta/                  # 每次运行的元数据 JSON
 ```
 
 ---
 
-## 新增一个源（约 30 行）
+## 新增一个源（JSON 配置驱动）
 
-1. 复制 `sources/` 下相近的源作模板，或参考各源实现。
-2. 子类化 `SourceBase`，设置 `name` / `needs_browser` / `needs_proxy`，实现 `async fetch_tasks(self, max_images) -> list[ImageTask]`。
-3. 每个 `ImageTask` 务必设 `referer`（站点源站）以绕防盗链。
-4. 在 `mj_scraper.py` 的 `build_source()` 加分支、`ALL_SOURCES` 加名字、按需加 CLI 参数。
-5. 测试：`$PY mj_scraper.py --source <新源> --max-images 6`（GFW 源加 `--proxy`）。
+主体源已统一为 JSON 配置驱动，新增源**无需写 Python**：
+
+1. 复制 `sources/json/` 下相近源的配置，改端点 / 分页 / 解析规则（`url_extract` / `block_extract` / `item` transform）。
+2. 注册表自动扫描收录（`services/source_registry.py`）；如该源需要专属 CLI 参数，在 `apps/cli/main.py` 加参数、在 `services/source_registry.py` 的 `_build_ctx` 补翻译。
+3. 测试：`$PY mj_scraper.py --source <新源> --max-images 6`（GFW 源加 `--proxy`）。
+
+> 需要特殊抓取逻辑的源（登录态 / 特殊签名）仍可写成 `SourceBase` 子类；四路径分类（http / curl / browser-html / browser-api）见 `scripts/p5_path_matrix.json`。
 
 更完整的架构说明见配套 skill：`multi-source-image-scraper`（用户级，含 `references/source_apis.md` 与各源端点文档、`scripts/new_source_template.py` 骨架）。
 
