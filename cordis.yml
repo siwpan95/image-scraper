@@ -20,6 +20,13 @@
       - "http://127.0.0.1:10809"
       - "socks5://127.0.0.1:7891"
 
+- name: services.proxy
+  id: proxy
+  config:
+    # 免费代理拉取（zdaye 公开页页数 / 优先 SOCKS5）
+    free_pages: 3
+    prefer_socks: false
+
 - name: services.source_registry
   id: sources
   config:

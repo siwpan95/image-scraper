@@ -35,6 +35,8 @@ CONFIG_DIR = os.environ.get("IMGSCRAPER_CONFIGS") or ROOT
 
 #: P1 就绪所需的服务集（config + sources）
 WANT_P1 = ("config", "sources")
+#: P2 就绪所需的服务集（+ proxy；服务实迁后的验收集）
+WANT_P2 = ("config", "proxy", "sources")
 
 ALLOWED_NAME_PREFIXES = ("services.",)
 ALLOWED_NAME_EXACT = ("@cordisjs/plugin-group",)
@@ -113,6 +115,6 @@ async def mount_tree(path: str, want=(), timeout: float = 8.0):
 
 
 __all__ = [
-    "CONFIG_DIR", "WANT_P1",
+    "CONFIG_DIR", "WANT_P1", "WANT_P2",
     "config_path", "load_tree", "await_ready", "mount_tree",
 ]
