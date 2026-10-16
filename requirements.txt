@@ -1,4 +1,8 @@
-# image-scraper dependencies (auto-generated 2026-08-20)
+# image-scraper dependencies
 httpx
+playwright
 moviepy
 proglog
+# cordis 内核依赖（vendor/cordis：include.py 硬依赖 pyyaml，hmr 用 watchdog）
+pyyaml
+watchdog
