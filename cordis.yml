@@ -27,6 +27,20 @@
     free_pages: 3
     prefer_socks: false
 
+- name: services.downloader
+  id: downloader
+  config:
+    # 下载器默认（逐参可被调用方覆盖）：并发 / 重试 / 速率 / 限速
+    concurrency: 5
+    retries: 3
+    rate_limit: 0.0
+    speed_limit: 0.0
+
+- name: services.meta_store
+  id: meta
+  config:
+    meta_dir: meta
+
 - name: services.source_registry
   id: sources
   config:

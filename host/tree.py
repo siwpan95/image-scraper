@@ -37,6 +37,8 @@ CONFIG_DIR = os.environ.get("IMGSCRAPER_CONFIGS") or ROOT
 WANT_P1 = ("config", "sources")
 #: P2 就绪所需的服务集（+ proxy；服务实迁后的验收集）
 WANT_P2 = ("config", "proxy", "sources")
+#: P3 就绪所需的服务集（+ downloader + meta；有状态服务实迁后的验收集）
+WANT_P3 = ("config", "proxy", "downloader", "meta", "sources")
 
 ALLOWED_NAME_PREFIXES = ("services.",)
 ALLOWED_NAME_EXACT = ("@cordisjs/plugin-group",)
